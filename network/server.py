@@ -13,6 +13,14 @@ MaxClients = None
 global MessageTags
 MessageTags = ["[MESSAGE]"]
 
+global ClientsInfo
+ClientsInfo = []
+
+class player:
+	def __init__(self, currency, AvaiableCurrency):
+		self.currency = currency
+		self.AvaiableCurrency = AvaiableCurrency
+
 def init(LHOST, LPORT):
 	global server_socket
 	server_socket = socket.socket()
@@ -25,10 +33,12 @@ def listen(MaxClients):
 
 def AcceptConnections():
 	global server_socket
+	global ClientsInfo
 
 	for i in range(1):
 		conn, address = server_socket.accept()
 		ClientsList.append(conn)
+		ClientsInfo.append(player([0, 0, 0], [0, 0, 0]))
 		print(f"Client connected:{conn} | {address}")
 
 def Receiver(client):
