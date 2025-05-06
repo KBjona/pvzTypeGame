@@ -9,7 +9,7 @@ global EventHandler
 EventHandler = None
 
 global MessageTags
-MessageTags = ["[MESSAGE]"]
+MessageTags = ["[MESSAGE]", "[RESPONSE]"]
 
 def init():
     global client_socket
@@ -65,7 +65,7 @@ def Receiver():
             print("INVALID MESSAGE SAVES TO UNFINISHEDMSG")
             UnFinishedMsg = msg
         else:
-            print("INVALID MESSAGE EXECUTING EVENT HANDLER")
+            print("INVALID MESSAGE")
 
         DeathCounter = 0
 
@@ -94,22 +94,3 @@ def send(msg):
         print(f"Error while sending:{e}")
         client_socket.close()
         print("Closed connection.")
-
-
-# def main():
-#     global client_socket
-
-#     #host = input("Enter the server's ip address:")
-#     #port = int(input("Enter the server's port:"))
-#     host = "localhost"
-#     port = 4040
-
-#     init()
-#     ConnectToServer(host, port)
-#     SetEventHandler(EventHandler)
-#     StartReceiving()
-
-#     time.sleep(1)
-#     client_socket.send("[MESSAGE]PleaseRespond[MESSAGE]".encode())
-
-# main()
