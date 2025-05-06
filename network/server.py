@@ -59,7 +59,8 @@ def Receiver(client):
 			msg += UnFinishedMsg
 
 		if any(msg.startswith(tag) and msg.endswith(tag) for tag in MessageTags):
-			print(f"VALID MESSAGE:{msg}")
+			print(f"VALID MESSAGE:{msg} RESPONDING")
+			ClientMessageHandler(client, msg)
 			UnFinishedMsg = None
 		elif any(msg.startswith(tag) for tag in MessageTags):
 			print("INVALID MESSAGE SAVES TO UNFINISHEDMSG")
@@ -68,6 +69,11 @@ def Receiver(client):
 			print("INVALID MESSAGE")
 
 		DeathCounter = 0
+
+def ClientMessageHandler(client, msg):
+	if (msg == "[MESSAGE]PleaseRespond[MESSAGE]"):
+		client.send("[MESSAGE]ok[MESSAGE]".encode())
+		print("responded to client")
 
 def main():
 	global server_socket
