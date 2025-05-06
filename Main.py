@@ -6,11 +6,21 @@ Height = 600
 Time = 60
 tilewidth = 8
 tileheight =5
+screenColor = (26, 138, 35)
 
 screen = pygame.display.set_mode((Width, Height))
 pygame.display.set_caption("presidents vs nazis")
 clock = pygame.time.Clock()
 tiles = [[0 for _ in range(tilewidth)] for _ in range(tileheight)]
+
+pygame.init()
+
+
+def update():
+    pygame.display.update()
+    clock.tick(Time)
+    time.sleep(0.05)
+
 
 def draw_grid():
     for i in range(tilewidth):
@@ -31,22 +41,22 @@ def draw_grid():
                         #print("you clicked on the square")
 
 def main():
-    pygame.init()
+
     running = True
+    
     while running:
-        screen.fill((26, 138, 35))
+
+        screen.fill(screenColor)
+    
         draw_grid()
+    
         for event in pygame.event.get():
-
-
             if event.type == pygame.QUIT:
                 running = False
+    
                 print("you clicked the X button")
+        update()
 
-
-        pygame.display.update()
-        clock.tick(Time)
-    time.sleep(0.05)
     pygame.quit()
 try:
     main()
