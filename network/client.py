@@ -1,7 +1,7 @@
 import socket
 import threading
 import time
-#hehe
+#hi
 global client_socket
 client_socket = None
 
