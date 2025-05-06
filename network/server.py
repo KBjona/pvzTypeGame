@@ -11,7 +11,7 @@ global MaxClients
 MaxClients = None
 
 global MessageTags
-MessageTags = ["[MESSAGE]"]
+MessageTags = ["[MESSAGE]", "[REQUEST]"]
 
 global ClientsInfo
 ClientsInfo = []
@@ -38,7 +38,7 @@ def AcceptConnections():
 	for i in range(1):
 		conn, address = server_socket.accept()
 		ClientsList.append(conn)
-		ClientsInfo.append(player([0, 0, 0], [0, 0, 0]))
+		ClientsInfo.append(player([0, 0, 0], [100, 0, 0]))
 		print(f"Client connected:{conn} | {address}")
 
 def Receiver(client):
@@ -81,9 +81,25 @@ def Receiver(client):
 		DeathCounter = 0
 
 def ClientMessageHandler(client, msg):
+	global ClientsList
+	global ClientsInfo
+
 	if (msg == "[MESSAGE]PleaseRespond[MESSAGE]"):
 		client.send("[MESSAGE]ok[MESSAGE]".encode())
 		print("responded to client")
+	elif ("collect" in msg): #[REQUEST]collect|index(int)|amount(int)[REQUEST]
+		msg = msg.replace("[REQUEST]", "").split("|")
+		index = int(msg[1])
+		amount = int(msg[2])
+		PlayerInfo = ClientsInfo[ClientsList.index(client)]
+		if (PlayerInfo.AvaiableCurrency[index] >= amount):
+			PlayerInfo.AvaiableCurrency[index] -= amount
+			PlayerInfo.currency[index] += amount
+			client.send("[RESPONSE]OK:COLLECTED[RESPONSE]".encode())
+			print(f"Currect client info: {PlayerInfo.currency} | {PlayerInfo.AvaiableCurrency}")
+		else:
+			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
+
 
 def main():
 	global server_socket
