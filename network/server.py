@@ -16,6 +16,9 @@ MessageTags = ["[MESSAGE]", "[REQUEST]"]
 global ClientsInfo
 ClientsInfo = []
 
+global tiles
+tiles = [[0 for _ in range(8)] for _ in range(5)]
+
 class player:
 	def __init__(self, currency, AvaiableCurrency):
 		self.currency = currency
@@ -83,6 +86,7 @@ def Receiver(client):
 def ClientMessageHandler(client, msg):
 	global ClientsList
 	global ClientsInfo
+	global tiles
 
 	if (msg == "[MESSAGE]PleaseRespond[MESSAGE]"):
 		client.send("[MESSAGE]ok[MESSAGE]".encode())
@@ -97,6 +101,17 @@ def ClientMessageHandler(client, msg):
 			PlayerInfo.currency[index] += amount
 			client.send("[RESPONSE]OK:COLLECTED[RESPONSE]".encode())
 			print(f"Currect client info: {PlayerInfo.currency} | {PlayerInfo.AvaiableCurrency}")
+		else:
+			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
+	elif ("select" in msg): # [REQUEST]select|index|index[REQUEST]
+		msg = msg.replace("[REQUEST]", "").split("|")
+		index = int(msg[1])
+		index2 = int(msg[2])
+		#VALIDATION CODE HERE
+		if (True):
+			tiles[index][index2] = 1
+			client.send("[RESPONSE]OK:SELECTED[RESPONSE]".encode())
+			print(f"Selected tile: {index} | {index2}")
 		else:
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
 

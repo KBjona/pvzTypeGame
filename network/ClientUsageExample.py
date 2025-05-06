@@ -14,3 +14,4 @@ client.StartReceiving() #start the receiver in a new thread so it doesnt block t
 
 time.sleep(1)
 client.client_socket.send("[REQUEST]collect|0|50[REQUEST]".encode()) #request to collect currency syntax: collect|Which currency(0-2)|how much
+client.client_socket.send("[REQUEST]select|0|3[REQUEST]".encode()) #request to select a tile syntax: select|index|index
