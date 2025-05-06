@@ -91,6 +91,4 @@ def main():
 		thread = threading.Thread(target=Receiver, args=(client,))
 		thread.start()
 
-	#print(ClientsList[0].recv(1024).decode())
-
 main()

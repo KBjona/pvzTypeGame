@@ -76,25 +76,40 @@ def SetEventHandler(func):
         raise ValueError("The first argument must be a callable (function).")
     EventHandler = func
 
-def EventHandler(msg):
-    print(f"EventHandler: {msg}")
-
-def main():
-    global client_socket
-
-    #host = input("Enter the server's ip address:")
-    #port = int(input("Enter the server's port:"))
-    host = "localhost"
-    port = 4040
-
-    init()
-    ConnectToServer(host, port)
-    SetEventHandler(EventHandler)
-
+def StartReceiving():
     ReceiverThread = threading.Thread(target=Receiver)
     ReceiverThread.start()
 
-    time.sleep(1)
-    client_socket.send("[MESSAGE]PleaseRespond[MESSAGE]".encode())
+def send(msg):
+    global client_socket
+    
+    if msg == None: return
+    elif msg == "":
+        print("Message is empty, ignoring.")
+        return
+    
+    try:
+        client_socket.send(msg.encode())
+    except Exception as e:
+        print(f"Error while sending:{e}")
+        client_socket.close()
+        print("Closed connection.")
 
-main()
+
+# def main():
+#     global client_socket
+
+#     #host = input("Enter the server's ip address:")
+#     #port = int(input("Enter the server's port:"))
+#     host = "localhost"
+#     port = 4040
+
+#     init()
+#     ConnectToServer(host, port)
+#     SetEventHandler(EventHandler)
+#     StartReceiving()
+
+#     time.sleep(1)
+#     client_socket.send("[MESSAGE]PleaseRespond[MESSAGE]".encode())
+
+# main()
