@@ -4,31 +4,45 @@ import network.client as client
 
 global screenColor, Width, Height, Time, tilewidth, tileheight
 global screen, clock, tiles, bg
+global peashooter
+global money
 
+money = 0 
 Width = 800
 Height = 600
 Time = 60
-tilewidth = 8
+tilewidth = 9
 tileheight = 5
 screenColor = (26, 138, 35)
 
 def setup():
     global screenColor, Width, Height, Time, tilewidth, tileheight
-    global screen, clock, tiles, bg
-    pygame.init()
-    screen = pygame.display.set_mode((Width, Height))
-    pygame.display.set_caption("presidents vs nazis")
-    clock = pygame.time.Clock()
-    tiles = [[0 for _ in range(tilewidth)] for _ in range(tileheight)]
-    bg = pygame.image.load("images/peashooter.png").convert_alpha()
-    print("BOOO")
-    bg = pygame.transform.scale(bg, (70, 70))
+    global screen, clock, tiles, peashooter, bg
+    global money
 
+    pygame.init()
+
+    screen = pygame.display.set_mode((Width, Height))
+
+    pygame.display.set_caption("presidents vs nazis")
+
+    clock = pygame.time.Clock()
+
+    tiles = [[0 for _ in range(tilewidth)] for _ in range(tileheight)]
+
+    peashooter = pygame.image.load("images/peashooter.png").convert_alpha()
+    peashooter = pygame.transform.scale(peashooter, (60, 60))
+
+    bg = pygame.image.load("images/currentBGimage.png").convert_alpha()
+    bg = pygame.transform.scale(bg, (Width, Height))
 
 def update():
+    global money
     pygame.display.update()
     clock.tick(Time)
+    money += 5
     time.sleep(0.05)
+    print(money)
 
 
 class Defender:
@@ -50,23 +64,27 @@ class Defender:
 
 
 def draw_grid():
+    global money
     for x in range(tilewidth):
         for y in range(tileheight):
-            sqr = pygame.Rect(x * 95 + 10, y * 95 + 70, 70, 70)
+            sqr = pygame.Rect(x * 80 + + 60 , y * 80 + 100, 60, 60)
             if tiles[y][x] == 0:
                 pygame.draw.rect(screen, (36, 200, 100), sqr)
             elif tiles[y][x] == 1:
-                screen.blit(bg, (x * 95 + 10, y * 95 + 70))
+                screen.blit(peashooter, (x * 80 + 60, y * 80 + 100))
             if pygame.mouse.get_pressed()[0]:
                 if sqr.collidepoint(pygame.mouse.get_pos()):
-                    tiles[y][x] = 1
-                    print(y, x)
-
+                    if money >= 100 and tiles[y][x] == 0:
+                        money -= 100
+                        tiles[y][x] = 1
+                        print(y, x)
+                        print("placed peashooter and -100 money")
 def main():
     setup()
     running = True
     while running:
-        screen.fill(screenColor)
+        #screen.fill(screenColor)
+        screen.blit(bg, (0, 0))
         draw_grid()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
