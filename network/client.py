@@ -80,6 +80,15 @@ def StartReceiving():
     ReceiverThread = threading.Thread(target=Receiver)
     ReceiverThread.start()
 
+def CloseConnection():
+    global client_socket
+
+    if client_socket != None:
+        client_socket.close()
+        print("Connection closed.")
+    else:
+        print("No connection to close.")
+
 def send(msg):
     global client_socket
     
