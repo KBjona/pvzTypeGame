@@ -4,9 +4,12 @@ import time
 host = "localhost"
 port = 4040
 
+global AllPlayersReady
 AllPlayersReady = False
 
 def EventHandler(msg):
+    global AllPlayersReady
+    
     print(f"EventHandler:{msg}")
     if msg == "[MESSAGE]SERVER FULL[MESSAGE]":
         AllPlayersReady = True
