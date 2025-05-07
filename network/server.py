@@ -34,14 +34,38 @@ def listen(MaxClients):
 	global server_socket
 	server_socket.listen(MaxClients)
 
+def RemoveClient(client):
+	global ClientsList
+	global ClientsInfo
+
+	client.close()
+	ClientsList.remove(client)
+	ClientsInfo.remove(ClientsList.index(client))
+	print(f"Client disconnected:{client}")
+
+def TellAll(msg):
+	global ClientsList
+
+	for client in ClientsList:
+		try:
+			client.send(msg.encode())
+		except Exception as e:
+			print(f"Error while sending message:{e}")
+			RemoveClient(client)
+
 def AcceptConnections():
 	global server_socket
 	global ClientsInfo
+	global MaxClients
 
-	for i in range(1):
+	for i in range(MaxClients):
 		conn, address = server_socket.accept()
 		ClientsList.append(conn)
 		ClientsInfo.append(player([0, 0, 0], [100, 0, 0]))
+		if (i == MaxClients):
+			TellAll("[MESSAGE]SERVER FULL[MESSAGE]")
+		else:
+			conn.send("[MESSAGE]WAITING FOR OTHER PLAYERS[MESSAGE]".encode())
 		print(f"Client connected:{conn} | {address}")
 
 def Receiver(client):
@@ -60,9 +84,7 @@ def Receiver(client):
 		
 		if msg == None: continue
 		elif msg == "" and DeathCounter >= 10:
-			client.close()
-			ClientsList.remove(client)
-			print(f"Client disconnected:{client}")
+			RemoveClient(client)
 			break
 		elif msg == "" and DeathCounter < 10:
 			DeathCounter += 1
@@ -119,13 +141,16 @@ def ClientMessageHandler(client, msg):
 def main():
 	global server_socket
 	global ClientsList
+	global MaxClients
 
 	host = "0.0.0.0"
 	#port = int(input("Enter port to host on:"))
 	port = 4040
 
+	MaxClients = 2
+
 	init(host, port)
-	listen(2)
+	listen(MaxClients)
 	AcceptConnections()
 	
 	for client in ClientsList:
