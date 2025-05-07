@@ -9,7 +9,7 @@ screen_height = 768  # Keep the height the same
 window_surface = pygame.display.set_mode((screen_width, screen_height))
 
 # Load the background image
-background = pygame.image.load("C:\\Users\\yuval\\Downloads\\Copy of Untitled.png")
+background = pygame.image.load("images/Copy of Untitled.png")
 background = pygame.transform.scale(background, (1024, 768))  # Keep the background size fixed
 
 # Define the main button
