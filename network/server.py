@@ -62,7 +62,7 @@ def AcceptConnections():
 		conn, address = server_socket.accept()
 		ClientsList.append(conn)
 		ClientsInfo.append(player([0, 0, 0], [100, 0, 0]))
-		if (i == MaxClients):
+		if (i == MaxClients - 1):
 			TellAll("[MESSAGE]SERVER FULL[MESSAGE]")
 		else:
 			conn.send("[MESSAGE]WAITING FOR OTHER PLAYERS[MESSAGE]".encode())
