@@ -13,14 +13,17 @@ tileheight = 5
 screenColor = (26, 138, 35)
 
 def setup():
+    global screenColor, Width, Height, Time, tilewidth, tileheight
     global screen, clock, tiles, bg
     pygame.init()
     screen = pygame.display.set_mode((Width, Height))
     pygame.display.set_caption("presidents vs nazis")
     clock = pygame.time.Clock()
     tiles = [[0 for _ in range(tilewidth)] for _ in range(tileheight)]
-    bg = pygame.image.load("pvzTypeGame/images/peashooter.png").convert_alpha()
+    bg = pygame.image.load("images/peashooter.png").convert_alpha()
+    print("BOOO")
     bg = pygame.transform.scale(bg, (70, 70))
+
 
 def update():
     pygame.display.update()
@@ -49,11 +52,11 @@ class Defender:
 def draw_grid():
     for x in range(tilewidth):
         for y in range(tileheight):
-            sqr = pygame.Rect(x * 95, y * 95 + 70, 70, 70)
+            sqr = pygame.Rect(x * 95 + 10, y * 95 + 70, 70, 70)
             if tiles[y][x] == 0:
                 pygame.draw.rect(screen, (36, 200, 100), sqr)
             elif tiles[y][x] == 1:
-                screen.blit(bg, (x * 95, y * 95 + 70))
+                screen.blit(bg, (x * 95 + 10, y * 95 + 70))
             if pygame.mouse.get_pressed()[0]:
                 if sqr.collidepoint(pygame.mouse.get_pos()):
                     tiles[y][x] = 1
