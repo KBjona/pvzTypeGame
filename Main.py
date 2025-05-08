@@ -1,12 +1,14 @@
 import pygame
 import time
+import random
 import network.client as client
 import threading
 
 global screenColor, Width, Height, Time, tilewidth, tileheight
 global screen, clock, tiles, bg
-global current_defender,peashooter, sunflower
+global current_defender,peashooter, sunflower, projectile, projectiles
 global money
+
 
 money = 0 
 Width = 800
@@ -16,6 +18,7 @@ tilewidth = 9
 tileheight = 5
 screenColor = (26, 138, 35)
 current_defender = 0
+projectiles = []
 
 
 def setup_defenders():
@@ -52,18 +55,22 @@ def setup():
     sunflower = pygame.image.load("images/sunflower.png").convert_alpha()
     sunflower = pygame.transform.scale(sunflower, (60, 60))
 
-
-    bg = pygame.image.load("images/currentBGimage.png").convert_alpha()
+    bg = pygame.image.load("images/yuvalsbg.png").convert_alpha()
     bg = pygame.transform.scale(bg, (Width, Height))
 
-    thread = threading.Thread(target=defender_action)
-    thread.start()
+    sunflower_thread = threading.Thread(target=sunflower_action)
+    sunflower_thread.start()
+    peashooter_thread = threading.Thread(target=peashooter_action)
+    peashooter_thread.start()
 
     setup_defenders()
 
+    projectiles = []
+
 def update():
-    global money
+    global money, projectile
     select_defender()
+    update_projectiles()
     pygame.display.update()
     clock.tick(Time)
     money += 1
@@ -89,25 +96,51 @@ def draw_text(text, font, color, x, y):
     text_surface = font.render(text, True, color)
     # Blit the text surface onto the screen at the specified position
     screen.blit(text_surface, (x, y))
-
-def defender_action():
-    global tiles, money
+def peashooter_action():
+    global tiles, projectile, projectiles
     while True:
-        time.sleep(5)
+        time.sleep(random.randint(2,4))
         for y in range(tileheight):
             for x in range(tilewidth):
                 if tiles[y][x] != 0:
-                    if tiles[y][x].type == "sunflower": 
+                    if tiles[y][x].type == "peashooter":
+                            projectile = pygame.rect.Rect(x * 80 + 60, y * 80 + 115, 10, 10)
+                            projectiles.append(projectile)
+                            print("peashooter shot")
+def update_projectiles():
+    global projectiles
+    for projectile in projectiles[:]:
+        # Move the projectile to the right
+        projectile.x += 10
+        # Remove the projectile if it goes off-screen
+        if projectile.x > Width:
+            projectiles.remove(projectile)
+
+
+
+def draw_projectiles():
+    global projectiles  # Ensure projectiles is referenced as global
+    for projectile in projectiles:
+        # Draw each projectile on the screen
+        pygame.draw.rect(screen, (0, 255, 0), projectile)
+
+def sunflower_action():
+    global tiles, money
+    while True:
+        time.sleep(random.randint(4,6))
+        for y in range(tileheight):
+            for x in range(tilewidth):
+                if tiles[y][x] != 0:
+                    if tiles[y][x].type == "sunflower":
                             money += 50
-                    elif tiles[y][x].type == peashooter:
-                        pass
+
 def draw_grid():
     global money, current_defender
     for x in range(tilewidth):
         for y in range(tileheight):
             sqr = pygame.Rect(x * 80 + 60 , y * 80 + 100, 60, 60)
             if tiles[y][x] == 0:
-                pygame.draw.rect(screen, (36, 200, 100), sqr)
+                pass
             else:
                 defender = tiles[y][x]
                 screen.blit(defender.image, (x * 80 + 60, y * 80 + 100))
@@ -126,10 +159,18 @@ def draw_grid():
                             print(y, x)
                             print("placed peashooter and -100 money")
 
-
+def display_current_defender():
+    global current_defender
+    draw_text("Current Defender is:", pygame.font.SysFont("Arial", 30), (0, 255, 0), 425, 40)
+    if current_defender == 1:
+        screen.blit(sunflower, (700, 20))
+    elif current_defender == 2:
+        screen.blit(peashooter, (700, 20))
+    else:
+        pass
 
 def main():
-
+    global current_defender
     setup()
     font = pygame.font.SysFont("Arial", 30)
     running = True
@@ -137,7 +178,9 @@ def main():
         #screen.fill(screenColor)
         screen.blit(bg, (0, 0))
         draw_grid()
+        draw_projectiles()
         draw_text("Money: " + str(money), font, (255,255,255), 0,0)
+        display_current_defender()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
