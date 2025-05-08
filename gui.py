@@ -1,5 +1,10 @@
 import pygame
+import network.client as client
+import threading
 pygame.init()
+
+global AllPlayersReady
+AllPlayersReady = False
 
 pygame.display.set_caption("pvz?")
 
@@ -48,6 +53,21 @@ back_button_text = "Back"
 # Font for button text
 font = pygame.font.Font(None, 36)
 
+def EventHandler(msg):
+    global AllPlayersReady
+                        
+    print(f"EventHandler:{msg}")
+    if msg == "[MESSAGE]SERVER FULL[MESSAGE]":
+        AllPlayersReady = True
+        print("All players are ready")
+
+def connect(host, port):
+    client.init() #self explanatory
+    client.ConnectToServer(host, int(port)) #connect to server with host and port
+    client.SetEventHandler(EventHandler) #set the event handler to a function that will handle the messages it gets from the server
+    client.StartReceiving() #start the receiver in a new thread so it doesnt block the main thread
+    print(f"Connecting to server: {host} on port: {port}")
+
 # Define a function for the second page
 def second_page():
     # Define the "Server Host" text box
@@ -69,6 +89,11 @@ def second_page():
     connect_button_color = (0, 255, 0)  # Green color
     connect_button_hover_color = (0, 200, 0)  # Darker green for hover
     connect_button_text = "Connect"
+    
+    cancel_button_rect = pygame.Rect(400, 100, 210, 60)  # x, y, width, height
+    cancel_button_color = (255, 0, 0)  # Green color
+    cancel_button_hover_color = (200, 0, 0)  # Darker green for hover
+    cancel_button_text = "cancel"
 
     second_page_running = True
     while second_page_running:
@@ -84,9 +109,13 @@ def second_page():
                 elif server_port_rect.collidepoint(event.pos):  # Check if the "Server Port" text box is clicked
                     server_port_active = True
                     server_host_active = False
+                elif cancel_button_rect.collidepoint(event.pos):  # Check if the "Cancel" button is clicked
+                    client.CloseConnection()
                 elif connect_button_rect.collidepoint(event.pos):  # Check if the "Connect" button is clicked
-                    print(f"Connecting to server: {server_host_text} on port: {server_port_text}")
+                    ConnectThread = threading.Thread(target=connect, args=(server_host_text, server_port_text))
+                    ConnectThread.start()
                 elif back_button_rect.collidepoint(event.pos):  # Check if the "Back" button is clicked
+                    client.CloseConnection()
                     second_page_running = False  # Go back to the main page
                 else:
                     server_host_active = False
@@ -152,6 +181,16 @@ def second_page():
         connect_button_text_rect = connect_button_text_surface.get_rect(center=connect_button_rect.center)
         window_surface.blit(connect_button_text_surface, connect_button_text_rect)
 
+        if cancel_button_rect.collidepoint(mouse_pos):
+            pygame.draw.rect(window_surface, cancel_button_hover_color, cancel_button_rect)  # Hover color
+        else:
+            pygame.draw.rect(window_surface, cancel_button_color, cancel_button_rect)  # Normal color
+
+        cancel_button_text_surface = font.render(cancel_button_text, True, (255, 255, 255))  # White text
+        cancel_button_text_rect = cancel_button_text_surface.get_rect(center=cancel_button_rect.center)
+        window_surface.blit(cancel_button_text_surface, cancel_button_text_rect)
+
+
         pygame.display.update()
 
 is_running = True
@@ -159,6 +198,7 @@ while is_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             is_running = False
+            client.CloseConnection()  # Close the connection when quitting
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if button_rect.collidepoint(event.pos):  # Check if the main button is clicked
                 second_page()  # Open the second page
