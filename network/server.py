@@ -19,6 +19,9 @@ ClientsInfo = []
 global tiles
 tiles = [[0 for _ in range(8)] for _ in range(5)]
 
+global cost
+cost = [[0, 0, 0], [10, 0, 0]]
+
 class player:
 	def __init__(self, currency, AvaiableCurrency):
 		self.currency = currency
@@ -40,7 +43,10 @@ def RemoveClient(client):
 
 	client.close()
 	ClientsList.remove(client)
-	ClientsInfo.remove(ClientsList.index(client))
+	try:
+		ClientsInfo.remove(ClientsList.index(client))
+	except:
+		pass
 	print(f"Client disconnected:{client}")
 
 def TellAll(msg):
@@ -80,6 +86,7 @@ def Receiver(client):
 			msg = client.recv(1024).decode()
 		except Exception as e:
 			print(f"Error while receiving:{e}")
+			RemoveClient(client)
 			break
 		
 		if msg == None: continue
@@ -114,9 +121,13 @@ def ClientMessageHandler(client, msg):
 		client.send("[MESSAGE]ok[MESSAGE]".encode())
 		print("responded to client")
 	elif ("collect" in msg): #[REQUEST]collect|index(int)|amount(int)[REQUEST]
-		msg = msg.replace("[REQUEST]", "").split("|")
-		index = int(msg[1])
-		amount = int(msg[2])
+		try:
+			msg = msg.replace("[REQUEST]", "").split("|")
+			index = int(msg[1])
+			amount = int(msg[2])
+		except:
+			client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
+			return
 		PlayerInfo = ClientsInfo[ClientsList.index(client)]
 		if (PlayerInfo.AvaiableCurrency[index] >= amount):
 			PlayerInfo.AvaiableCurrency[index] -= amount
@@ -125,18 +136,28 @@ def ClientMessageHandler(client, msg):
 			print(f"Currect client info: {PlayerInfo.currency} | {PlayerInfo.AvaiableCurrency}")
 		else:
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
-	elif ("select" in msg): # [REQUEST]select|index|index[REQUEST]
-		msg = msg.replace("[REQUEST]", "").split("|")
-		index = int(msg[1])
-		index2 = int(msg[2])
-		#VALIDATION CODE HERE
-		if (True):
+	elif ("select" in msg): # [REQUEST]select|index|index|type[REQUEST] (1=salt)
+		try:
+			msg = msg.replace("[REQUEST]", "").split("|")
+			index = int(msg[1])
+			index2 = int(msg[2])
+			type = int(msg[3])
+		except:
+			client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
+			return
+		
+		PlayerInfo = ClientsInfo[ClientsList.index(client)]
+		if all(PlayerInfo.currency[i] >= cost[type][i] for i in range(len(cost[type]))):
+			for i in range(len(cost[type])):
+				PlayerInfo.currency[i] -= cost[type][i]
 			tiles[index][index2] = 1
 			client.send("[RESPONSE]OK:SELECTED[RESPONSE]".encode())
-			print(f"Selected tile: {index} | {index2}")
+			print(f"Selected tile: {index} | {index2}\ntiles:{tiles}\nPlayerInfo: {PlayerInfo.currency}")
 		else:
+			print("Mismatch info with server")
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
-
+	else:
+		client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 
 def main():
 	global server_socket
@@ -147,7 +168,7 @@ def main():
 	#port = int(input("Enter port to host on:"))
 	port = 4040
 
-	MaxClients = 2
+	MaxClients = 1
 
 	init(host, port)
 	listen(MaxClients)
