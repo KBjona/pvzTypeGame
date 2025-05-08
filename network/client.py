@@ -14,6 +14,9 @@ MessageTags = ["[MESSAGE]", "[RESPONSE]"]
 global receive
 receive = False
 
+global connecting
+connecting = False
+
 def init():
     global client_socket
     client_socket = socket.socket()
@@ -21,8 +24,11 @@ def init():
 
 def ConnectToServer(RHOST, RPORT):
     global client_socket
+    global connecting
 
-    while True:
+    connecting = True
+
+    while connecting:
         try:
             client_socket.connect((RHOST, RPORT))
             break
@@ -89,10 +95,12 @@ def StartReceiving():
 def CloseConnection():
     global client_socket
     global receive
+    global connecting
 
     if client_socket != None:
         client_socket.close()
         receive = False
+        connecting = False
         print("Connection closed.")
     else:
         print("No connection to close.")
