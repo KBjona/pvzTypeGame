@@ -18,13 +18,16 @@ global ClientsInfo
 ClientsInfo = []
 
 global tiles
-tiles = [[0 for _ in range(8)] for _ in range(5)]
+tiles = [[0 for _ in range(9)] for _ in range(5)]
 
 global cost
 cost = [[0, 0, 0], [0, 0, 0], [75, 0, 0]]
 
 global running
 running = False
+
+global ConsoleWriter
+ConsoleWriter = None
 
 class player:
 	def __init__(self, currency, AvaiableCurrency):
@@ -38,7 +41,7 @@ def initFunctions():
 
 	ClientsList = []
 	ClientsInfo = []
-	tiles = [[0 for _ in range(8)] for _ in range(5)]
+	tiles = [[0 for _ in range(9)] for _ in range(5)]
 
 def init(LHOST, LPORT):
 	global server_socket
@@ -56,13 +59,15 @@ def RemoveClient(client):
 	global ClientsList
 	global ClientsInfo
 
+	num = ClientsList.index(client)
+
 	client.close()
 	ClientsList.remove(client)
 	try:
 		ClientsInfo.remove(ClientsList.index(client))
 	except:
 		pass
-	print(f"Client disconnected:{client}")
+	ConsoleWriter(f"Client({num}) disconnected:{client}")
 
 def TellAll(msg):
 	global ClientsList
@@ -71,7 +76,7 @@ def TellAll(msg):
 		try:
 			client.send(msg.encode())
 		except Exception as e:
-			print(f"Error while sending message:{e}")
+			ConsoleWriter(f"Error while sending message:{e}")
 			RemoveClient(client)
 
 def AcceptConnections():
@@ -86,6 +91,7 @@ def AcceptConnections():
 	while not len(ClientsList) == MaxClients and running:
 		try:
 			conn, address = server_socket.accept()
+			ConsoleWriter(f"Client connected({len(ClientsList)}):{conn} | {address}")
 		except:
 			continue
 		ClientsList.append(conn)
@@ -95,7 +101,6 @@ def AcceptConnections():
 			break
 		else:
 			conn.send("[MESSAGE]WAITING FOR OTHER PLAYERS[MESSAGE]".encode())
-		print(f"Client connected:{conn} | {address}")
 
 def Receiver(client):
 	global ClientsList
@@ -109,7 +114,7 @@ def Receiver(client):
 		try:
 			msg = client.recv(1024).decode()
 		except Exception as e:
-			print(f"Error while receiving:{e}")
+			ConsoleWriter(f"Error while receiving:{e}")
 			RemoveClient(client)
 			break
 		
@@ -125,14 +130,14 @@ def Receiver(client):
 			msg += UnFinishedMsg
 
 		if any(msg.startswith(tag) and msg.endswith(tag) for tag in MessageTags):
-			print(f"VALID MESSAGE:{msg} RESPONDING")
+			ConsoleWriter(f"VALID MESSAGE:{msg} RESPONDING")
 			ClientMessageHandler(client, msg)
 			UnFinishedMsg = None
 		elif any(msg.startswith(tag) for tag in MessageTags):
-			print("INVALID MESSAGE SAVES TO UNFINISHEDMSG")
+			ConsoleWriter("INVALID MESSAGE SAVES TO UNFINISHEDMSG")
 			UnFinishedMsg = msg
 		else:
-			print("INVALID MESSAGE")
+			ConsoleWriter("INVALID MESSAGE")
 
 		DeathCounter = 0
 
@@ -143,7 +148,7 @@ def ClientMessageHandler(client, msg):
 
 	if (msg == "[MESSAGE]PleaseRespond[MESSAGE]"):
 		client.send("[MESSAGE]ok[MESSAGE]".encode())
-		print("responded to client")
+		ConsoleWriter(f"responded to client({ClientsList.index(client)})")
 	elif ("collect" in msg): #[REQUEST]collect|index(int)|amount(int)[REQUEST]
 		try:
 			msg = msg.replace("[REQUEST]", "").split("|")
@@ -157,7 +162,7 @@ def ClientMessageHandler(client, msg):
 			PlayerInfo.AvaiableCurrency[index] -= amount
 			PlayerInfo.currency[index] += amount
 			client.send("[RESPONSE]OK:COLLECTED[RESPONSE]".encode())
-			print(f"Currect client info: {PlayerInfo.currency} | {PlayerInfo.AvaiableCurrency}")
+			ConsoleWriter(f"Current client({ClientsList.index(client)}) info: {PlayerInfo.currency} | {PlayerInfo.AvaiableCurrency}")
 		else:
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
 	elif ("select" in msg): # [REQUEST]select|index|index|type[REQUEST] (1=salt, 2=Bolonez)
@@ -174,11 +179,11 @@ def ClientMessageHandler(client, msg):
 		if all(PlayerInfo.currency[i] >= cost[type][i] for i in range(len(cost[type]))):
 			for i in range(len(cost[type])):
 				PlayerInfo.currency[i] -= cost[type][i]
-			tiles[index][index2] = 1
+			tiles[index][index2] = type
 			client.send("[RESPONSE]OK:SELECTED[RESPONSE]".encode())
-			print(f"Selected tile: {index} | {index2}\ntiles:{tiles}\nPlayerInfo: {PlayerInfo.currency}")
+			ConsoleWriter(f"Selected tile: {index} | {index2}\ntiles:{tiles}\nPlayerInfo: {PlayerInfo.currency}")
 		else:
-			print("Mismatch info with server")
+			ConsoleWriter("Mismatch info with server")
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
 	else:
 		client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
@@ -217,22 +222,15 @@ def StopServer():
 	for client in ClientsList:
 		client.close()
 	server_socket.close()
-	print("Server stopped.")
-#MaxClients = 2
-# def main():
-# 	global server_socket
-# 	global ClientsList
-# 	global MaxClients
+	ConsoleWriter("Server stopped.")
 
-# 	host = "0.0.0.0"
-# 	#port = int(input("Enter port to host on:"))
-# 	port = 4040
+def GetTiles():
+	global tiles
+	return tiles
 
-# 	MaxClients = 1
+def SetConsoleWriter(func):
+    global ConsoleWriter
 
-# 	init(host, port)
-# 	listen(MaxClients)
-# 	AcceptConnections()
-	
-# 	StartReceiving()
-# main()
+    if not callable(func):
+        raise ValueError("The first argument must be a callable (function).")
+    ConsoleWriter = func

@@ -24,7 +24,7 @@ while AllPlayersReady == False:
     time.sleep(1)
 
 time.sleep(1)
-client.client_socket.send("[REQUEST]collect|0|50[REQUEST]".encode()) #request to collect currency syntax: collect|Which currency(0-2)|how much
+client.client_socket.send("[REQUEST]collect|0|75[REQUEST]".encode()) #request to collect currency syntax: collect|Which currency(0-2)|how much
 time.sleep(1)
 client.client_socket.send("[REQUEST]select|0|3|2[REQUEST]".encode()) #request to select a tile syntax: select|index|index|type (1=salt, 2=bolonez)
 
