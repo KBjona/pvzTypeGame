@@ -4,7 +4,7 @@ import network.client as client
 
 global screenColor, Width, Height, Time, tilewidth, tileheight
 global screen, clock, tiles, bg
-global peashooter
+global current_defender,peashooter, sunflower
 global money
 
 money = 0 
@@ -14,11 +14,21 @@ Time = 60
 tilewidth = 9
 tileheight = 5
 screenColor = (26, 138, 35)
+current_defender = -1
+
 
 def setup_defenders():
-    global peashooter
+    global peashooter, sunflower
     peashooter_setup = Defender("peashooter", 0, 0, 10, 100,100, "images/peashooter.png")
-    
+    sunflower_setup = Defender("sunflower", 0, 0, 10, 100,100, "images/sunflower.png")
+
+def select_defender():
+    global current_defender
+    print(current_defender)
+    if pygame.key.get_pressed()[pygame.K_1]:
+        current_defender = 0
+    if pygame.key.get_pressed()[pygame.K_2]:
+        current_defender = 1
 
 def setup():
     global screenColor, Width, Height, Time, tilewidth, tileheight
@@ -46,9 +56,10 @@ def setup():
 
 def update():
     global money
+    select_defender()
     pygame.display.update()
     clock.tick(Time)
-    money += 5
+    money += 3
     time.sleep(0.05)
     print(money)
 
@@ -79,7 +90,7 @@ def draw_grid():
     global money
     for x in range(tilewidth):
         for y in range(tileheight):
-            sqr = pygame.Rect(x * 80 + + 60 , y * 80 + 100, 60, 60)
+            sqr = pygame.Rect(x * 80 + 60 , y * 80 + 100, 60, 60)
             if tiles[y][x] == 0:
                 pygame.draw.rect(screen, (36, 200, 100), sqr)
             else:
