@@ -33,8 +33,8 @@ def setup_defenders():
     sap_proj = pygame.image.load("images/sap pro.png").convert_alpha()
     sap_proj = pygame.transform.scale(sap_proj, (60, 60))
 
-    sunflower = pygame.image.load("images/sunflower.png").convert_alpha()
-    sunflower = pygame.transform.scale(sunflower, (60, 60))
+    sunflower = pygame.image.load("images/salt shaker .png").convert_alpha()
+    sunflower = pygame.transform.scale(sunflower, (75, 75))
 
     sunflower_thread = threading.Thread(target=sunflower_action)
     sunflower_thread.start()
@@ -100,6 +100,7 @@ def draw_text(text, font, color, x, y):
     text_surface = font.render(text, True, color)
     # Blit the text surface onto the screen at the specified position
     screen.blit(text_surface, (x, y))
+
 def peashooter_action():
     global tiles, projectile, projectiles
     while True:
@@ -147,13 +148,13 @@ def draw_grid():
                 pass
             else:
                 defender = tiles[y][x]
-                screen.blit(defender.image, (x * 80 + 60, y * 80 + 100))
+                screen.blit(defender.image, (x * 80 + 53, y * 80 + 92))
             if pygame.mouse.get_pressed()[0]:
                 if sqr.collidepoint(pygame.mouse.get_pos()):
                     if current_defender == 1:
                         if money >= 50 and tiles[y][x] == 0:
                             money -= 50
-                            tiles[y][x] = Defender("sunflower", x, y, 10, 100, 100, sunflower)
+                            tiles[y][x] = Defender("sunflower", x - 30, y - 15, 10, 100, 100, sunflower)
                             print(y, x)
                             print("placed sunflower and -50 money")
                     elif current_defender == 2:
