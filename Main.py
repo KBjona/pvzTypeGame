@@ -22,13 +22,27 @@ projectiles = []
 
 
 def setup_defenders():
-    global peashooter, sunflower
-    peashooter_setup = Defender("peashooter", 0, 0, 10, 100,100, "images/peashooter.png")
-    sunflower_setup = Defender("sunflower", 0, 0, 10, 100,100, "images/sunflower.png")
+    global screenColor, Width, Height, Time, tilewidth, tileheight
+    global screen, clock, tiles, peashooter, bg, sunflower, sap_proj
+    
+    peashooter_setup = Defender("peashooter", 0, 0, 1, 5,100, "images/sap.png")
+    sunflower_setup = Defender("sunflower", 0, 0, 0, 3,100, "images/sunflower.png")
+
+    peashooter = pygame.image.load("images/sap.png").convert_alpha()
+    peashooter = pygame.transform.scale(peashooter, (70, 70))
+    sap_proj = pygame.image.load("images/sap pro.png").convert_alpha()
+    sap_proj = pygame.transform.scale(sap_proj, (60, 60))
+
+    sunflower = pygame.image.load("images/sunflower.png").convert_alpha()
+    sunflower = pygame.transform.scale(sunflower, (60, 60))
+
+    sunflower_thread = threading.Thread(target=sunflower_action)
+    sunflower_thread.start()
+    peashooter_thread = threading.Thread(target=peashooter_action)
+    peashooter_thread.start()
 
 def select_defender():
     global current_defender
-    print(current_defender)
     if pygame.key.get_pressed()[pygame.K_1]:
         current_defender = 1
     if pygame.key.get_pressed()[pygame.K_2]:
@@ -36,7 +50,7 @@ def select_defender():
 
 def setup():
     global screenColor, Width, Height, Time, tilewidth, tileheight
-    global screen, clock, tiles, peashooter, bg, sunflower
+    global screen, clock, tiles, peashooter, bg, sunflower, sap_proj
     global money
 
     pygame.init()
@@ -50,18 +64,8 @@ def setup():
 
     tiles = [[0 for _ in range(tilewidth)] for _ in range(tileheight)]
 
-    peashooter = pygame.image.load("images/peashooter.png").convert_alpha()
-    peashooter = pygame.transform.scale(peashooter, (60, 60))
-    sunflower = pygame.image.load("images/sunflower.png").convert_alpha()
-    sunflower = pygame.transform.scale(sunflower, (60, 60))
-
     bg = pygame.image.load("images/yuvalsbg.png").convert_alpha()
     bg = pygame.transform.scale(bg, (Width, Height))
-
-    sunflower_thread = threading.Thread(target=sunflower_action)
-    sunflower_thread.start()
-    peashooter_thread = threading.Thread(target=peashooter_action)
-    peashooter_thread.start()
 
     setup_defenders()
 
@@ -119,10 +123,10 @@ def update_projectiles():
 
 
 def draw_projectiles():
-    global projectiles  # Ensure projectiles is referenced as global
+    global projectiles, sap_proj # Ensure projectiles is referenced as global
     for projectile in projectiles:
         # Draw each projectile on the screen
-        pygame.draw.rect(screen, (0, 255, 0), projectile)
+        screen.blit(sap_proj, (projectile.x, projectile.y - 20))
 
 def sunflower_action():
     global tiles, money
@@ -155,7 +159,7 @@ def draw_grid():
                     elif current_defender == 2:
                         if money >= 100 and tiles[y][x] == 0:
                             money -= 100
-                            tiles[y][x] = Defender("peashooter", x, y, 10, 100, 100, peashooter)
+                            tiles[y][x] = Defender("peashooter", x - 30, y - 15, 10, 100, 100, peashooter)
                             print(y, x)
                             print("placed peashooter and -100 money")
 
@@ -186,6 +190,7 @@ def main():
                 running = False
                 print("You clicked the X button")
         update()
-    pygame.quit()
 
+    pygame.quit()
+    
 main()
