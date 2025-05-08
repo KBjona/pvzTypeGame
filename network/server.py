@@ -1,5 +1,6 @@
 import socket
 import threading
+import time
 
 global server_socket
 server_socket = None
@@ -20,18 +21,32 @@ global tiles
 tiles = [[0 for _ in range(8)] for _ in range(5)]
 
 global cost
-cost = [[0, 0, 0], [10, 0, 0]]
+cost = [[0, 0, 0], [0, 0, 0], [75, 0, 0]]
+
+global running
+running = False
 
 class player:
 	def __init__(self, currency, AvaiableCurrency):
 		self.currency = currency
 		self.AvaiableCurrency = AvaiableCurrency
 
+def initFunctions():
+	global ClientsList
+	global ClientsInfo
+	global tiles
+
+	ClientsList = []
+	ClientsInfo = []
+	tiles = [[0 for _ in range(8)] for _ in range(5)]
+
 def init(LHOST, LPORT):
 	global server_socket
+	global running
+	initFunctions()
+	running = True
 	server_socket = socket.socket()
 	server_socket.bind((LHOST, LPORT))
-	server_socket.settimeout(60)
 
 def listen(MaxClients):
 	global server_socket
@@ -62,14 +77,22 @@ def TellAll(msg):
 def AcceptConnections():
 	global server_socket
 	global ClientsInfo
+	global ClientsList
 	global MaxClients
+	global running
 
-	for i in range(MaxClients):
-		conn, address = server_socket.accept()
+	server_socket.settimeout(1)
+
+	while not len(ClientsList) == MaxClients and running:
+		try:
+			conn, address = server_socket.accept()
+		except:
+			continue
 		ClientsList.append(conn)
 		ClientsInfo.append(player([0, 0, 0], [100, 0, 0]))
-		if (i == MaxClients - 1):
+		if (len(ClientsList) == MaxClients):
 			TellAll("[MESSAGE]SERVER FULL[MESSAGE]")
+			break
 		else:
 			conn.send("[MESSAGE]WAITING FOR OTHER PLAYERS[MESSAGE]".encode())
 		print(f"Client connected:{conn} | {address}")
@@ -77,10 +100,11 @@ def AcceptConnections():
 def Receiver(client):
 	global ClientsList
 	global MessageTags
+	global running
 	UnFinishedMsg = None
 	DeathCounter = 0
 
-	while True:
+	while running:
 		msg = None
 		try:
 			msg = client.recv(1024).decode()
@@ -136,7 +160,7 @@ def ClientMessageHandler(client, msg):
 			print(f"Currect client info: {PlayerInfo.currency} | {PlayerInfo.AvaiableCurrency}")
 		else:
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
-	elif ("select" in msg): # [REQUEST]select|index|index|type[REQUEST] (1=salt)
+	elif ("select" in msg): # [REQUEST]select|index|index|type[REQUEST] (1=salt, 2=Bolonez)
 		try:
 			msg = msg.replace("[REQUEST]", "").split("|")
 			index = int(msg[1])
@@ -159,23 +183,56 @@ def ClientMessageHandler(client, msg):
 	else:
 		client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 
-def main():
-	global server_socket
+def StartReceiving():
 	global ClientsList
-	global MaxClients
 
-	host = "0.0.0.0"
-	#port = int(input("Enter port to host on:"))
-	port = 4040
+	while IsAllReady() == False:
+		time.sleep(0.1)
+		if not running:
+			return
 
-	MaxClients = 1
-
-	init(host, port)
-	listen(MaxClients)
-	AcceptConnections()
-	
 	for client in ClientsList:
 		thread = threading.Thread(target=Receiver, args=(client,))
 		thread.start()
 
-main()
+def SetMaxClients(num):
+	global MaxClients
+	MaxClients = num
+
+def IsAllReady():
+	global ClientsList
+	global MaxClients
+
+	if len(ClientsList) == MaxClients:
+		return True
+	else:
+		return False
+	
+def StopServer():
+	global server_socket
+	global ClientsList
+	global running
+	running = False
+
+	for client in ClientsList:
+		client.close()
+	server_socket.close()
+	print("Server stopped.")
+#MaxClients = 2
+# def main():
+# 	global server_socket
+# 	global ClientsList
+# 	global MaxClients
+
+# 	host = "0.0.0.0"
+# 	#port = int(input("Enter port to host on:"))
+# 	port = 4040
+
+# 	MaxClients = 1
+
+# 	init(host, port)
+# 	listen(MaxClients)
+# 	AcceptConnections()
+	
+# 	StartReceiving()
+# main()
