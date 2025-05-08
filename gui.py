@@ -26,13 +26,13 @@ button_text = "play multiplayer"
 # Define additional buttons individually with unique colors
 button2_rect = pygame.Rect(25, 180, 210, 60)
 button2_text = "play singleplayer"
-button2_color = (255, 0, 0)  # Red color for Button 2
-button2_hover_color = (200, 0, 0)  # Darker red for hover
+button2_color = (0, 255, 0)  # Red color for Button 2
+button2_hover_color = (0, 200,0)  # Darker red for hover
 
 button3_rect = pygame.Rect(25, 260, 210, 60)
-button3_text = "Button 3"
-button3_color = (0, 255, 0)  # Green color for Button 3
-button3_hover_color = (0, 200, 0)  # Darker green for hover
+button3_text = "tutorial"
+button3_color = (255,0,0)  # Green color for Button 3
+button3_hover_color = (200,0,0)  # Darker green for hover
 
 button4_rect = pygame.Rect(25, 340, 210, 60)
 button4_text = "Button 4"
