@@ -11,6 +11,9 @@ EventHandler = None
 global MessageTags
 MessageTags = ["[MESSAGE]", "[RESPONSE]"]
 
+global receive
+receive = False
+
 def init():
     global client_socket
     client_socket = socket.socket()
@@ -31,10 +34,11 @@ def Receiver():
     global client_socket
     global MessageTags
     global EventHandler
+    global receive
     UnFinishedMsg = None
     DeathCounter = 0
 
-    while True:
+    while receive:
         msg = None
         try:
             msg = client_socket.recv(1024).decode()
@@ -77,14 +81,18 @@ def SetEventHandler(func):
     EventHandler = func
 
 def StartReceiving():
+    global receive
+    receive = True
     ReceiverThread = threading.Thread(target=Receiver)
     ReceiverThread.start()
 
 def CloseConnection():
     global client_socket
+    global receive
 
     if client_socket != None:
         client_socket.close()
+        receive = False
         print("Connection closed.")
     else:
         print("No connection to close.")
