@@ -16,7 +16,7 @@ screen_height = 768
 window_surface = pygame.display.set_mode((screen_width, screen_height))
 
 # Load the background images
-background2 = pygame.image.load("C:\\Users\\yuval\\Downloads\\lazanya (1).png")
+background2 = pygame.image.load(images/lazanya (2).png)
 background = pygame.image.load("images/Copy of Untitled.png")
 background = pygame.transform.scale(background, (1024, 768))  # Keep the background size fixed
 
