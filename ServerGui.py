@@ -46,8 +46,8 @@ def StartOrStopServer():
         WriteToConsole("Starting receiver thread...\nWaiting for players...")
         AcceptThread = threading.Thread(target=server.AcceptConnections)
         AcceptThread.start()
-        ReceiverThread = threading.Thread(target=server.StartReceiving)
-        ReceiverThread.start()
+        ReceiverAndSenderThread = threading.Thread(target=server.StartReceivingAndSending)
+        ReceiverAndSenderThread.start()
         UpdateTiles = True
         UpdateGameTilesThread = threading.Thread(target=UpdateGameTiles)
         UpdateGameTilesThread.start()

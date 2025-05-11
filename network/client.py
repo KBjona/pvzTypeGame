@@ -9,7 +9,7 @@ global EventHandler
 EventHandler = None
 
 global MessageTags
-MessageTags = ["[MESSAGE]", "[RESPONSE]"]
+MessageTags = ["[MESSAGE]", "[RESPONSE]", "[REQUEST]"]
 
 global receive
 receive = False

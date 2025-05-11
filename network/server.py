@@ -106,8 +106,11 @@ def Receiver(client):
 	global ClientsList
 	global MessageTags
 	global running
+	global server_socket
 	UnFinishedMsg = None
 	DeathCounter = 0
+
+	server_socket.settimeout(1)
 
 	while running:
 		msg = None
@@ -188,13 +191,37 @@ def ClientMessageHandler(client, msg):
 	else:
 		client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 
-def StartReceiving():
+def SaltManager():
+	global tiles
+	global ClientsList
+	global running
+
+	defender = ClientsList[0]
+
+	while running:
+		salt = 0
+		for i in range(len(tiles)):
+			for j in range(len(tiles[i])):
+				if tiles[i][j] == 1:
+					salt += 50
+		try:
+			defender.send(f"[REQUEST]ADD|0|{salt}[REQUEST]".encode()) #Add currency request syntax: ADD|type|amount (0=salt, 1=pepper)
+		except Exception as e:
+			ConsoleWriter(f"Error while sending message:{e}")
+			RemoveClient(defender)
+			break
+		time.sleep(5)
+
+def StartReceivingAndSending():
 	global ClientsList
 
 	while IsAllReady() == False:
 		time.sleep(0.1)
 		if not running:
 			return
+
+	SaltThread = threading.Thread(target=SaltManager)
+	SaltThread.start()
 
 	for client in ClientsList:
 		thread = threading.Thread(target=Receiver, args=(client,))
@@ -220,7 +247,7 @@ def StopServer():
 	running = False
 
 	for client in ClientsList:
-		client.close()
+		RemoveClient(client)
 	server_socket.close()
 	ConsoleWriter("Server stopped.")
 
