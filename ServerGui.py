@@ -1,4 +1,5 @@
 import network.server as server
+from pyngrok import ngrok
 import tkinter as tk
 from tkinter import scrolledtext
 import threading
@@ -14,7 +15,8 @@ def LoadImages():
 
     images = {
         1: tk.PhotoImage(file="images/salt shaker .png"),
-        2: tk.PhotoImage(file="images/sap.png")
+        2: tk.PhotoImage(file="images/sap.png"),
+        3: tk.PhotoImage(file="images/pepper shaker.png")
     }
 
     scale = 100 / 10
@@ -43,6 +45,14 @@ def StartOrStopServer():
         server.init("0.0.0.0", int(port))
         WriteToConsole("Server initialized. Listening for clients...")
         server.listen(2)
+        NgrokApi = NgrokEntry.get()
+        if NgrokApi != "":
+            WriteToConsole("Starting ngrok tunnel in 1 second(This might freeze for about a minute if this is the first time your using ngrok)...")
+            time.sleep(1)
+            try:
+                NgrokForward(int(port), NgrokApi)
+            except Exception as e:
+                WriteToConsole(f"Error starting ngrok tunnel: {e}")
         WriteToConsole("Starting receiver thread...\nWaiting for players...")
         AcceptThread = threading.Thread(target=server.AcceptConnections)
         AcceptThread.start()
@@ -88,12 +98,19 @@ def UpdateGameTiles():
         DrawGameInMini(server.GetTiles())
         time.sleep(1)
 
+def NgrokForward(port, key):
+    ngrok.set_auth_token(key)
+    listener = ngrok.connect(port, "tcp")
+    WriteToConsole(f"Ngrok tunnel created: {listener.public_url}")
+    HOST, PORT = listener.public_url.replace("tcp://", "").split(":")
+    WriteToConsole(f"Server Host:{HOST}\nServer Port:{PORT}")
+
 server.SetConsoleWriter(WriteToConsole)
 
 server.SetMaxClients(2)
 
 width = 910
-height = 400
+height = 500
 
 root = tk.Tk()
 root.title("Server GUI")
@@ -105,6 +122,12 @@ PortLabel.pack(pady=5)
 
 PortEntry = tk.Entry(root)
 PortEntry.pack(pady=5)
+
+NgrokLabel = tk.Label(root, text="Ngrok Token(nothing means dont use):")
+NgrokLabel.pack(pady=5)
+
+NgrokEntry = tk.Entry(root)
+NgrokEntry.pack(pady=5)
 
 StartBtnText = tk.StringVar()
 StartBtnText.set("Start")

@@ -24,6 +24,6 @@ while AllPlayersReady == False:
     time.sleep(1)
 
 time.sleep(1)
-client.client_socket.send("[REQUEST]select|0|3|1[REQUEST]".encode()) #request to select a tile syntax: select|index|index|type (1=salt, 2=bolonez)
+client.client_socket.send("[REQUEST]select|0|3|1[REQUEST]".encode()) #request to select a tile syntax: select|index|index|type (1=salt, 2=bolonez, 3=pepper)
 
 #client.CloseConnection() #close the connection to the server

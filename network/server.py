@@ -151,7 +151,7 @@ def ClientMessageHandler(client, msg):
 	if (msg == "[MESSAGE]PleaseRespond[MESSAGE]"):
 		client.send("[MESSAGE]ok[MESSAGE]".encode())
 		ConsoleWriter(f"responded to client({ClientsList.index(client)})")
-	elif ("select" in msg): # [REQUEST]select|index|index|type[REQUEST] (1=salt, 2=Bolonez)
+	elif ("select" in msg): # [REQUEST]select|index|index|type[REQUEST] (1=salt, 2=Bolonez, 3=pepper)
 		try:
 			msg = msg.replace("[REQUEST]", "").split("|")
 			index = int(msg[1])
