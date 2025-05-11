@@ -30,9 +30,8 @@ global ConsoleWriter
 ConsoleWriter = None
 
 class player:
-	def __init__(self, currency, AvaiableCurrency):
+	def __init__(self, currency):
 		self.currency = currency
-		self.AvaiableCurrency = AvaiableCurrency
 
 def initFunctions():
 	global ClientsList
@@ -95,7 +94,7 @@ def AcceptConnections():
 		except:
 			continue
 		ClientsList.append(conn)
-		ClientsInfo.append(player([0, 0, 0], [100, 0, 0]))
+		ClientsInfo.append(player([100, 0, 0], [100, 0, 0]))
 		if (len(ClientsList) == MaxClients):
 			TellAll("[MESSAGE]SERVER FULL[MESSAGE]")
 			break
@@ -152,22 +151,6 @@ def ClientMessageHandler(client, msg):
 	if (msg == "[MESSAGE]PleaseRespond[MESSAGE]"):
 		client.send("[MESSAGE]ok[MESSAGE]".encode())
 		ConsoleWriter(f"responded to client({ClientsList.index(client)})")
-	elif ("collect" in msg): #[REQUEST]collect|index(int)|amount(int)[REQUEST]
-		try:
-			msg = msg.replace("[REQUEST]", "").split("|")
-			index = int(msg[1])
-			amount = int(msg[2])
-		except:
-			client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
-			return
-		PlayerInfo = ClientsInfo[ClientsList.index(client)]
-		if (PlayerInfo.AvaiableCurrency[index] >= amount):
-			PlayerInfo.AvaiableCurrency[index] -= amount
-			PlayerInfo.currency[index] += amount
-			client.send("[RESPONSE]OK:COLLECTED[RESPONSE]".encode())
-			ConsoleWriter(f"Current client({ClientsList.index(client)}) info: {PlayerInfo.currency} | {PlayerInfo.AvaiableCurrency}")
-		else:
-			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
 	elif ("select" in msg): # [REQUEST]select|index|index|type[REQUEST] (1=salt, 2=Bolonez)
 		try:
 			msg = msg.replace("[REQUEST]", "").split("|")
@@ -194,9 +177,11 @@ def ClientMessageHandler(client, msg):
 def SaltManager():
 	global tiles
 	global ClientsList
+	global ClientsInfo
 	global running
 
 	defender = ClientsList[0]
+	DefenderInfo = ClientsInfo[0]
 
 	while running:
 		salt = 0
@@ -204,6 +189,7 @@ def SaltManager():
 			for j in range(len(tiles[i])):
 				if tiles[i][j] == 1:
 					salt += 50
+		DefenderInfo.currency[0] += salt
 		try:
 			defender.send(f"[REQUEST]ADD|0|{salt}[REQUEST]".encode()) #Add currency request syntax: ADD|type|amount (0=salt, 1=pepper)
 		except Exception as e:
