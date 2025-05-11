@@ -130,7 +130,7 @@ def Receiver(client):
 			msg += UnFinishedMsg
 
 		if any(msg.startswith(tag) and msg.endswith(tag) for tag in MessageTags):
-			ConsoleWriter(f"VALID MESSAGE:{msg} RESPONDING")
+			ConsoleWriter(f"VALID MESSAGE CLIENT({ClientsList.index(client)}):{msg} RESPONDING")
 			ClientMessageHandler(client, msg)
 			UnFinishedMsg = None
 		elif any(msg.startswith(tag) for tag in MessageTags):
@@ -183,7 +183,7 @@ def ClientMessageHandler(client, msg):
 			client.send("[RESPONSE]OK:SELECTED[RESPONSE]".encode())
 			ConsoleWriter(f"Selected tile: {index} | {index2}\ntiles:{tiles}\nPlayerInfo: {PlayerInfo.currency}")
 		else:
-			ConsoleWriter("Mismatch info with server")
+			ConsoleWriter(f"Client{ClientsList.index(client)}:Mismatch info with server")
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
 	else:
 		client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
