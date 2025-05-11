@@ -7,10 +7,11 @@ import threading
 global screenColor, Width, Height, Time, tilewidth, tileheight
 global screen, clock, tiles, bg
 global current_defender,peashooter, sunflower, projectile, projectiles
-global money
+global defenderMoney, attackerMoney
 
 
-money = 0 
+defenderMoney = 500
+attackerMoney = 500
 Width = 800
 Height = 600
 Time = 60
@@ -51,7 +52,6 @@ def select_defender():
 def setup():
     global screenColor, Width, Height, Time, tilewidth, tileheight
     global screen, clock, tiles, peashooter, bg, sunflower, sap_proj
-    global money
 
     pygame.init()
     pygame.font.init()
@@ -71,13 +71,35 @@ def setup():
 
     projectiles = []
 
+def attackerSetup():
+    global screenColor, Width, Height, Time, tilewidth, tileheight
+    global screen, clock, tiles, peashooter, bg, sunflower, sap_proj
+
+    pygame.init()
+    pygame.font.init()
+
+    screen = pygame.display.set_mode((Width  + 200, Height))
+
+    pygame.display.set_caption("presidents vs nazis")
+
+    clock = pygame.time.Clock()
+
+    tiles = [[0 for _ in range(tilewidth)] for _ in range(tileheight)]
+
+    bg = pygame.image.load("images/yuvalsbg.png").convert_alpha()
+    bg = pygame.transform.scale(bg, (Width, Height))
+
+    setup_defenders()
+
+    projectiles = []
+
 def update():
-    global money, projectile
+    global defenderMoney, projectile, attackerMoney
     select_defender()
     update_projectiles()
     pygame.display.update()
     clock.tick(Time)
-    money += 1
+    attackerMoney += 3
     time.sleep(0.05)
  
 
@@ -130,17 +152,17 @@ def draw_projectiles():
         screen.blit(sap_proj, (projectile.x, projectile.y - 20))
 
 def sunflower_action():
-    global tiles, money
+    global tiles, defenderMoney
     while True:
         time.sleep(random.randint(4,6))
         for y in range(tileheight):
             for x in range(tilewidth):
                 if tiles[y][x] != 0:
                     if tiles[y][x].type == "sunflower":
-                            money += 50
+                            defenderMoney += 50
 
-def draw_grid():
-    global money, current_defender
+def draw_grid(status):
+    global defenderMoney, current_defender
     for x in range(tilewidth):
         for y in range(tileheight):
             sqr = pygame.Rect(x * 80 + 60 , y * 80 + 100, 60, 60)
@@ -149,20 +171,24 @@ def draw_grid():
             else:
                 defender = tiles[y][x]
                 screen.blit(defender.image, (x * 80 + 53, y * 80 + 92))
-            if pygame.mouse.get_pressed()[0]:
-                if sqr.collidepoint(pygame.mouse.get_pos()):
-                    if current_defender == 1:
-                        if money >= 50 and tiles[y][x] == 0:
-                            money -= 50
-                            tiles[y][x] = Defender("sunflower", x - 30, y - 15, 10, 100, 100, sunflower)
-                            print(y, x)
-                            print("placed sunflower and -50 money")
-                    elif current_defender == 2:
-                        if money >= 100 and tiles[y][x] == 0:
-                            money -= 100
-                            tiles[y][x] = Defender("peashooter", x - 30, y - 15, 10, 100, 100, peashooter)
-                            print(y, x)
-                            print("placed peashooter and -100 money")
+    
+            if pygame.mouse.get_pressed()[0] and sqr.collidepoint(pygame.mouse.get_pos()) and status == "defender": 
+                if current_defender == 1 and defenderMoney >= 50 and tiles[y][x] == 0:
+                    defenderMoney -= 50
+                    tiles[y][x] = Defender("sunflower", x - 30, y - 15, 10, 100, 100, sunflower)
+                    print(y, x)
+                    print("placed sunflower and -50 defenderMoney")
+                elif current_defender == 2 and defenderMoney >= 100 and tiles[y][x] == 0:
+                    defenderMoney -= 100
+                    tiles[y][x] = Defender("peashooter", x - 30, y - 15, 10, 100, 100, peashooter)
+                    print(y, x)
+                    print("placed peashooter and -100 defenderMoney")
+def place_attacker():
+    idk = pygame.image.load("images/mize.png").convert_alpha()
+    idk = pygame.transform.scale(idk, (70, 70))
+    for y in range(tileheight):
+        screen.blit(idk, ( 850, y * 80 + 92))
+
 
 def display_current_defender():
     global current_defender
@@ -174,17 +200,16 @@ def display_current_defender():
     else:
         pass
 
-def main():
-    global current_defender
+def defenderGameLoop():
     setup()
     font = pygame.font.SysFont("Arial", 30)
     running = True
     while running:
         #screen.fill(screenColor)
         screen.blit(bg, (0, 0))
-        draw_grid()
+        draw_grid("defender")
         draw_projectiles()
-        draw_text("Money: " + str(money), font, (255,255,255), 0,0)
+        draw_text("Money: " + str(defenderMoney), font, (255,255,255), 0,0)
         display_current_defender()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -193,5 +218,31 @@ def main():
         update()
 
     pygame.quit()
-    
-main()
+
+def attackerGameLoop():
+    attackerSetup()
+    font = pygame.font.SysFont("Arial", 30)
+    running = True
+    while running:
+        screen.blit(bg, (0, 0))
+        draw_grid("attacker")
+        place_attacker()
+        draw_projectiles()
+        draw_text("Money: " + str(attackerMoney), font, (255,255,255), 0,0)
+        display_current_defender()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                print("You clicked the X button")
+        update()
+
+    pygame.quit()
+
+
+def main():
+    #defenderGameLoop()
+    attackerGameLoop()
+
+
+if __name__ == "__main__":
+    main()  
