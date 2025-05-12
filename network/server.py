@@ -94,7 +94,7 @@ def AcceptConnections():
 		except:
 			continue
 		ClientsList.append(conn)
-		ClientsInfo.append(player([100, 0, 0], [100, 0, 0]))
+		ClientsInfo.append(player([100, 0, 0]))
 		if (len(ClientsList) == MaxClients):
 			TellAll("[MESSAGE]SERVER FULL[MESSAGE]")
 			break
