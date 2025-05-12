@@ -1,5 +1,5 @@
 import network.server as server
-from pyngrok import ngrok
+import ngrok
 import tkinter as tk
 from tkinter import scrolledtext
 import threading
@@ -62,6 +62,7 @@ def StartOrStopServer():
         UpdateGameTilesThread = threading.Thread(target=UpdateGameTiles)
         UpdateGameTilesThread.start()
     else:
+        #ngrok.disconnect()
         server.StopServer()
         UpdateTiles = False
         GridCanvas.delete("all")
@@ -101,8 +102,9 @@ def UpdateGameTiles():
 def NgrokForward(port, key):
     ngrok.set_auth_token(key)
     listener = ngrok.connect(port, "tcp")
-    WriteToConsole(f"Ngrok tunnel created: {listener.public_url}")
-    HOST, PORT = listener.public_url.replace("tcp://", "").split(":")
+    url = str(listener.url())
+    WriteToConsole(f"Ngrok tunnel created: {url}")
+    HOST, PORT = url.replace("tcp://", "").split(":")
     WriteToConsole(f"Server Host:{HOST}\nServer Port:{PORT}")
 
 server.SetConsoleWriter(WriteToConsole)
