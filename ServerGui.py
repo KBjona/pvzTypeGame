@@ -62,7 +62,7 @@ def StartOrStopServer():
         UpdateGameTilesThread = threading.Thread(target=UpdateGameTiles)
         UpdateGameTilesThread.start()
     else:
-        #ngrok.disconnect()
+        ngrok.disconnect()
         server.StopServer()
         UpdateTiles = False
         GridCanvas.delete("all")

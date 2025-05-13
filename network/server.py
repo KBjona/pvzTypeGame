@@ -1,6 +1,7 @@
 import socket
 import threading
 import time
+import math
 
 global server_socket
 server_socket = None
@@ -28,6 +29,12 @@ running = False
 
 global ConsoleWriter
 ConsoleWriter = None
+
+global SaltTime
+SaltTime = 0
+
+global SaltTimes
+SaltTimes = []
 
 class player:
 	def __init__(self, currency):
@@ -147,6 +154,8 @@ def ClientMessageHandler(client, msg):
 	global ClientsList
 	global ClientsInfo
 	global tiles
+	global SaltTimes
+	global SaltTime
 
 	if (msg == "[MESSAGE]PleaseRespond[MESSAGE]"):
 		client.send("[MESSAGE]ok[MESSAGE]".encode())
@@ -166,6 +175,9 @@ def ClientMessageHandler(client, msg):
 			for i in range(len(cost[type])):
 				PlayerInfo.currency[i] -= cost[type][i]
 			tiles[index][index2] = type
+			if type == 1:
+				SaltTimes.append(f"{SaltTime}|{index}|{index2}")
+				ConsoleWriter(str(SaltTimes))
 			client.send("[RESPONSE]OK:SELECTED[RESPONSE]".encode())
 			ConsoleWriter(f"Selected tile: {index} | {index2}\ntiles:{tiles}\nPlayerInfo: {PlayerInfo.currency}")
 			if ClientsList.index(client) == 0:
@@ -179,20 +191,27 @@ def ClientMessageHandler(client, msg):
 		client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 
 def SaltManager():
-	global tiles
 	global ClientsList
 	global ClientsInfo
 	global running
+	global SaltTimes
+	global SaltTime
 
 	defender = ClientsList[0]
 	DefenderInfo = ClientsInfo[0]
 
 	while running:
 		salt = 0
-		for i in range(len(tiles)):
-			for j in range(len(tiles[i])):
-				if tiles[i][j] == 1:
-					salt += 25
+		for i in SaltTimes:
+			i = i.split("|")[0]
+			if int(i) == SaltTime:
+				salt += 25
+		SaltTime += 1
+		time.sleep(0.01)
+		if SaltTime >= 500:
+			SaltTime = 0
+		if salt <= 0:
+			continue
 		DefenderInfo.currency[0] += salt
 		try:
 			defender.send(f"[REQUEST]ADD|0|{salt}[REQUEST]".encode()) #Add currency request syntax: ADD|type|amount (0=salt, 1=pepper)
@@ -200,7 +219,6 @@ def SaltManager():
 			ConsoleWriter(f"Error while sending message:{e}")
 			RemoveClient(defender)
 			break
-		time.sleep(20)
 
 def StartReceivingAndSending():
 	global ClientsList
