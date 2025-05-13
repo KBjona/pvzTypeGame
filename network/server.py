@@ -21,7 +21,7 @@ global tiles
 tiles = [[0 for _ in range(9)] for _ in range(5)]
 
 global cost
-cost = [[0, 0, 0], [0, 0, 0], [75, 0, 0]]
+cost = [[0, 0, 0], [50, 0, 0], [100, 0, 0]]
 
 global running
 running = False
@@ -168,6 +168,10 @@ def ClientMessageHandler(client, msg):
 			tiles[index][index2] = type
 			client.send("[RESPONSE]OK:SELECTED[RESPONSE]".encode())
 			ConsoleWriter(f"Selected tile: {index} | {index2}\ntiles:{tiles}\nPlayerInfo: {PlayerInfo.currency}")
+			if ClientsList.index(client) == 0:
+				ClientsList[1].send(f"[REQUEST]select|{index}|{index2}|{type}[REQUEST]".encode())
+			else:
+				ClientsList[0].send(f"[REQUEST]select|{index}|{index2}|{type}[REQUEST]".encode())
 		else:
 			ConsoleWriter(f"Client{ClientsList.index(client)}:Mismatch info with server")
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
@@ -188,7 +192,11 @@ def SaltManager():
 		for i in range(len(tiles)):
 			for j in range(len(tiles[i])):
 				if tiles[i][j] == 1:
+<<<<<<< HEAD
 					salt += 50
+=======
+					salt += 25
+>>>>>>> f6934c7 (did a bunch of stuff)
 		DefenderInfo.currency[0] += salt
 		try:
 			defender.send(f"[REQUEST]ADD|0|{salt}[REQUEST]".encode()) #Add currency request syntax: ADD|type|amount (0=salt, 1=pepper)
@@ -196,7 +204,11 @@ def SaltManager():
 			ConsoleWriter(f"Error while sending message:{e}")
 			RemoveClient(defender)
 			break
+<<<<<<< HEAD
 		time.sleep(5)
+=======
+		time.sleep(20)
+>>>>>>> f6934c7 (did a bunch of stuff)
 
 def StartReceivingAndSending():
 	global ClientsList

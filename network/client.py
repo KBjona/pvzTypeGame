@@ -20,7 +20,6 @@ connecting = False
 def init():
     global client_socket
     client_socket = socket.socket()
-    client_socket.settimeout(60)
 
 def ConnectToServer(RHOST, RPORT):
     global client_socket

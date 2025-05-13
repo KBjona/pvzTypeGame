@@ -45,12 +45,21 @@ def StartOrStopServer():
         server.init("0.0.0.0", int(port))
         WriteToConsole("Server initialized. Listening for clients...")
         server.listen(2)
+<<<<<<< HEAD
         NgrokApi = NgrokEntry.get()
         if NgrokApi != "":
             WriteToConsole("Starting ngrok tunnel in 1 second(This might freeze for about a minute if this is the first time your using ngrok)...")
             time.sleep(1)
             try:
                 NgrokForward(int(port), NgrokApi)
+=======
+        NgrokToken = NgrokEntry.get()
+        if NgrokToken != "":
+            WriteToConsole("Starting ngrok tunnel in 1 second(This might freeze for about a minute if this is the first time your using ngrok)...")
+            time.sleep(1)
+            try:
+                NgrokForward(int(port), NgrokToken)
+>>>>>>> f6934c7 (did a bunch of stuff)
             except Exception as e:
                 WriteToConsole(f"Error starting ngrok tunnel: {e}")
         WriteToConsole("Starting receiver thread...\nWaiting for players...")
@@ -119,6 +128,11 @@ root.title("Server GUI")
 root.geometry(f"{width}x{height}")
 root.resizable(False, False)
 
+BgImage = tk.PhotoImage(file="images/ServerGUI.png")
+background_label = tk.Label(root, image=BgImage)
+background_label.image = BgImage
+background_label.place(x=0, y=0, relwidth=1, relheight=1)
+
 PortLabel = tk.Label(root, text="Local Port:")
 PortLabel.pack(pady=5)
 
@@ -137,13 +151,15 @@ StartBtnText.set("Start")
 StartButton = tk.Button(root, textvariable=StartBtnText, command=StartOrStopServer)
 StartButton.pack(pady=5)
 
-BottomFrame = tk.Frame(root)
-BottomFrame.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=10)
+BottomLeftFrame = tk.Frame(root)
+BottomLeftFrame.pack(side="left", anchor="sw", padx=5, pady=5)
+BottomRightFrame = tk.Frame(root)
+BottomRightFrame.pack(side="right", anchor="se", padx=5, pady=5)
 
-ConsoleText = scrolledtext.ScrolledText(BottomFrame, state=tk.DISABLED, height=15, width=50)
+ConsoleText = scrolledtext.ScrolledText(BottomLeftFrame, state=tk.DISABLED, height=15, width=50)
 ConsoleText.pack(side=tk.LEFT, padx=(0, 10))
 
-GridCanvas = tk.Canvas(BottomFrame, width=450, height=250, bg="#d9d9d9")
+GridCanvas = tk.Canvas(BottomRightFrame, width=450, height=250, bg="#d9d9d9")
 GridCanvas.pack(side=tk.RIGHT)
 
 LoadImages()
