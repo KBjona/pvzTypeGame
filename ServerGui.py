@@ -45,21 +45,12 @@ def StartOrStopServer():
         server.init("0.0.0.0", int(port))
         WriteToConsole("Server initialized. Listening for clients...")
         server.listen(2)
-<<<<<<< HEAD
-        NgrokApi = NgrokEntry.get()
-        if NgrokApi != "":
-            WriteToConsole("Starting ngrok tunnel in 1 second(This might freeze for about a minute if this is the first time your using ngrok)...")
-            time.sleep(1)
-            try:
-                NgrokForward(int(port), NgrokApi)
-=======
         NgrokToken = NgrokEntry.get()
         if NgrokToken != "":
             WriteToConsole("Starting ngrok tunnel in 1 second(This might freeze for about a minute if this is the first time your using ngrok)...")
             time.sleep(1)
             try:
                 NgrokForward(int(port), NgrokToken)
->>>>>>> f6934c7 (did a bunch of stuff)
             except Exception as e:
                 WriteToConsole(f"Error starting ngrok tunnel: {e}")
         WriteToConsole("Starting receiver thread...\nWaiting for players...")

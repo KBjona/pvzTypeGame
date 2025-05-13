@@ -192,11 +192,7 @@ def SaltManager():
 		for i in range(len(tiles)):
 			for j in range(len(tiles[i])):
 				if tiles[i][j] == 1:
-<<<<<<< HEAD
-					salt += 50
-=======
 					salt += 25
->>>>>>> f6934c7 (did a bunch of stuff)
 		DefenderInfo.currency[0] += salt
 		try:
 			defender.send(f"[REQUEST]ADD|0|{salt}[REQUEST]".encode()) #Add currency request syntax: ADD|type|amount (0=salt, 1=pepper)
@@ -204,11 +200,7 @@ def SaltManager():
 			ConsoleWriter(f"Error while sending message:{e}")
 			RemoveClient(defender)
 			break
-<<<<<<< HEAD
-		time.sleep(5)
-=======
 		time.sleep(20)
->>>>>>> f6934c7 (did a bunch of stuff)
 
 def StartReceivingAndSending():
 	global ClientsList
