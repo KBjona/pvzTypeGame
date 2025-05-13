@@ -201,15 +201,15 @@ def SaltManager():
 	DefenderInfo = ClientsInfo[0]
 
 	while running:
+		time.sleep(0.01)
+		SaltTime += 1
+		if SaltTime >= 500:
+			SaltTime = 0
 		salt = 0
 		for i in SaltTimes:
 			i = i.split("|")[0]
 			if int(i) == SaltTime:
 				salt += 25
-		SaltTime += 1
-		time.sleep(0.01)
-		if SaltTime >= 500:
-			SaltTime = 0
 		if salt <= 0:
 			continue
 		DefenderInfo.currency[0] += salt
