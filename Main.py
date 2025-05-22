@@ -132,11 +132,12 @@ def peashooter_action():
                 if tiles[y][x] != 0:
                     if tiles[y][x].type == "peashooter":
                         tiles[y][x].time += 0.001
-                        if tiles[y][x].time >= 1000:
+                        if tiles[y][x].time >= 2000:
                             tiles[y][x].time = 0
                             projectile = pygame.rect.Rect(x * 80 + 60, y * 80 + 115, 10, 10)
                             projectiles.append(projectile)
                             print("peashooter shot")
+
 def update_projectiles():
     global projectiles
     for projectile in projectiles[:]:
