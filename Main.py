@@ -104,7 +104,7 @@ def update():
  
 
 class Defender:
-    def __init__(self, type, x, y, damage, health, price, image):
+    def __init__(self, type, x, y, damage, health, price, image, time = 0):
         self.type = type
         self.x = x
         self.y = y
@@ -112,6 +112,7 @@ class Defender:
         self.health = health
         self.image = image
         self.price = price
+        self.time = time
     def damaged(self, damage):
         self.health -= damage
         if self.health <= 0:
@@ -126,11 +127,13 @@ def draw_text(text, font, color, x, y):
 def peashooter_action():
     global tiles, projectile, projectiles
     while True:
-        time.sleep(random.randint(2,4))
         for y in range(tileheight):
             for x in range(tilewidth):
                 if tiles[y][x] != 0:
                     if tiles[y][x].type == "peashooter":
+                        tiles[y][x].time += 0.001
+                        if tiles[y][x].time >= 1000:
+                            tiles[y][x].time = 0
                             projectile = pygame.rect.Rect(x * 80 + 60, y * 80 + 115, 10, 10)
                             projectiles.append(projectile)
                             print("peashooter shot")
