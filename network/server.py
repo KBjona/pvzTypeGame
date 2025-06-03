@@ -22,7 +22,7 @@ global tiles
 tiles = [[0 for _ in range(9)] for _ in range(5)]
 
 global cost
-cost = [[0, 0, 0], [50, 0, 0], [100, 0, 0]]
+cost = [[0, 0, 0], [50, 0, 0], [100, 0, 0], [50, 0, 0], [100, 0, 0], [150, 0, 0]] #0, salt, bolonez, moshe, shlomi, josh
 
 global running
 running = False
@@ -170,6 +170,13 @@ def ClientMessageHandler(client, msg):
 			client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 			return
 		
+		if type in [1, 2, 3] and not ClientsList.index(client) == 0:
+			client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
+			return
+		elif type in [4, 5, 6] and not ClientsList.index(client) == 1:
+			client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
+			return
+
 		PlayerInfo = ClientsInfo[ClientsList.index(client)]
 		if all(PlayerInfo.currency[i] >= cost[type][i] for i in range(len(cost[type]))):
 			for i in range(len(cost[type])):
@@ -189,6 +196,26 @@ def ClientMessageHandler(client, msg):
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
 	else:
 		client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
+
+def BrainsManager():
+	global ClientsList
+	global ClientsInfo
+	global running
+
+	attacker = ClientsList[1]
+	AttackerInfo = ClientsInfo[1]
+
+	brains = 100
+
+	while running:
+		time.sleep(5)
+		AttackerInfo.currency[0] += brains
+		try:
+			attacker.send(f"[REQUEST]ADD|0|{brains}[REQUEST]".encode()) #Add currency request syntax: ADD|type|amount (0=salt, 1=pepper)
+		except Exception as e:
+			ConsoleWriter(f"Error while sending message:{e}")
+			RemoveClient(attacker)
+			break
 
 def SaltManager():
 	global ClientsList
@@ -230,6 +257,9 @@ def StartReceivingAndSending():
 
 	SaltThread = threading.Thread(target=SaltManager)
 	SaltThread.start()
+
+	BrainThread = threading.Thread(target=BrainsManager)
+	BrainThread.start()
 
 	for client in ClientsList:
 		thread = threading.Thread(target=Receiver, args=(client,))
