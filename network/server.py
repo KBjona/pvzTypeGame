@@ -1,7 +1,6 @@
 import socket
 import threading
 import time
-import math
 
 global server_socket
 server_socket = None
@@ -158,7 +157,11 @@ def ClientMessageHandler(client, msg):
 	global SaltTime
 
 	if (msg == "[MESSAGE]PleaseRespond[MESSAGE]"):
-		client.send("[MESSAGE]ok[MESSAGE]".encode())
+		if ClientsList.index(client) == 0:
+			mode = "defender"
+		else:
+			mode = "attacker"
+		client.send(f"[MESSAGE]{mode}[MESSAGE]".encode())
 		ConsoleWriter(f"responded to client({ClientsList.index(client)})")
 	elif ("select" in msg): # [REQUEST]select|index|index|type[REQUEST] (1=salt, 2=Bolonez, 3=pepper)
 		try:
@@ -170,10 +173,10 @@ def ClientMessageHandler(client, msg):
 			client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 			return
 		
-		if type in [1, 2, 3] and not ClientsList.index(client) == 0:
+		if type in [0, 1, 2] and not ClientsList.index(client) == 0:
 			client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 			return
-		elif type in [4, 5, 6] and not ClientsList.index(client) == 1:
+		elif type in [3, 4, 5] and not ClientsList.index(client) == 1:
 			client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 			return
 
@@ -203,6 +206,8 @@ def ClientMessageHandler(client, msg):
 			except:
 				client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 			return
+		
+			#damage logic here
 		else:
 			try:
 				msg = msg.replace("[REQUEST]", "").split("|")
@@ -212,6 +217,8 @@ def ClientMessageHandler(client, msg):
 			except:
 				client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 			return
+		
+			#damage logic here
 	else:
 		client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 

@@ -8,10 +8,11 @@ global screenColor, Width, Height, Time, tilewidth, tileheight
 global screen, clock, tiles, bg
 global current_defender,peashooter, sunflower, projectile, projectiles, current_attacker, attackers
 global defenderMoney, attackerMoney
+global AllPlayersReady
+global defend
 
-
-defenderMoney = 500
-attackerMoney = 500
+defenderMoney = 100
+attackerMoney = 100
 Width = 800
 Height = 600
 Time = 60
@@ -22,13 +23,55 @@ current_defender = 0
 current_attacker = 0
 attackers = []
 projectiles = []
+AllPlayersReady = False
+defend = None
 
+def ConnectToMultiplayerHost(host, port):
+    print("Connecting to server...")
+    client.init() #self explanatory
+    client.ConnectToServer(host, port) #connect to server with host and port
+    client.SetEventHandler(ServerEventHandler) #set the event handler to a function that will handle the messages it gets from the server
+    client.StartReceiving()
 
+def ServerEventHandler(msg):
+    global AllPlayersReady
+    global defend
+    global tiles
+    
+    print(f"EventHandler:{msg}")
+    if msg == "[MESSAGE]attacker[MESSAGE]":
+        defend = False
+    elif msg == "[MESSAGE]defender[MESSAGE]":
+        defend = True
+    elif msg == "[MESSAGE]SERVER FULL[MESSAGE]":
+        AllPlayersReady = True
+        print("All players are ready")
+    elif "[REQUEST]ADD" in msg: #[REQUEST]ADD|0|{salt}[REQUEST]
+        msg = msg.replace("[REQUEST]", "").split("|")
+        #type = msg[1] (YONA YOU LAZY ADD TYPES OF MONEY ALREADY)
+        amount = int(msg[2])
+        AddMoney(amount)
+    elif "[REQUEST]select" in msg: #[REQUEST]select|index|index|type[REQUEST]
+        msg = msg.replace("[REQUEST]", "").split("|")
+        index = int(msg[1])
+        index2 = int(msg[2])
+        type = int(msg[3])
+        if type == 1:
+            tiles[index][index2] = Defender("sunflower", index - 30, index2 - 15, 10, 100, 100, sunflower)
+        elif type == 2:
+            tiles[index][index2] = Defender("peashooter", index - 30, index2 - 15, 10, 100, 100, peashooter)
 
+def AddMoney(money):
+    global defenderMoney
+    global attackerMoney
+    if defend:
+        defenderMoney += money
+    else:
+        attackerMoney += money
 
 def setup_defenders():
     global screenColor, Width, Height, Time, tilewidth, tileheight
-    global screen, clock, tiles, peashooter, bg, sunflower, sap_proj
+    global screen, clock, tiles, peashooter, bg, sunflower, sap_proj, defend
     
     peashooter_setup = Defender("peashooter", 0, 0, 1, 5,100, "images/sap.png")
     sunflower_setup = Defender("sunflower", 0, 0, 0, 3,100, "images/sunflower.png")
@@ -40,9 +83,7 @@ def setup_defenders():
 
     sunflower = pygame.image.load("images/salt shaker .png").convert_alpha()
     sunflower = pygame.transform.scale(sunflower, (75, 75))
-
-    sunflower_thread = threading.Thread(target=sunflower_action)
-    sunflower_thread.start()
+    
     peashooter_thread = threading.Thread(target=peashooter_action)
     peashooter_thread.start()
 
@@ -141,7 +182,6 @@ def update_attacker():
     update_projectiles()
     pygame.display.update()
     clock.tick(Time)
-    attackerMoney += 3
     time.sleep(0.05)
   
 
@@ -222,16 +262,6 @@ def draw_projectiles():
         # Draw each projectile on the screen
         screen.blit(sap_proj, (projectile.x, projectile.y - 20))
 
-def sunflower_action():
-    global tiles, defenderMoney
-    while True:
-        time.sleep(random.randint(4,6))
-        for y in range(tileheight):
-            for x in range(tilewidth):
-                if tiles[y][x] != 0:
-                    if tiles[y][x].type == "sunflower":
-                            defenderMoney += 50
-
 def draw_grid(status):
     global defenderMoney, current_defender,x ,y
     for x in range(tilewidth):
@@ -253,11 +283,13 @@ def getinput(status, loc = 0):
     if status == "defender":
         if current_defender == 1 and defenderMoney >= 50 and tiles[y][x] == 0:
             defenderMoney -= 50
+            client.client_socket.send(f"[REQUEST]select|{y}|{x}|1[REQUEST]".encode())
             tiles[y][x] = Defender("sunflower", x - 30, y - 15, 30, 100, 100, sunflower)
             print(y, x)
             print("placed sunflower and -50 defenderMoney")
         elif current_defender == 2 and defenderMoney >= 100 and tiles[y][x] == 0:
             defenderMoney -= 100
+            client.client_socket.send(f"[REQUEST]select|{y}|{x}|2[REQUEST]".encode())
             tiles[y][x] = Defender("peashooter", x - 30, y - 15, 30, 100, 100, peashooter)
             print(y, x)
             print("placed peashooter and -100 defenderMoney")
@@ -393,8 +425,30 @@ def attackerGameLoop():
 
 
 def main():
-    #defenderGameLoop()
-    attackerGameLoop()
+    global AllPlayersReady
+    global defend
+
+    MultiplayerThread = threading.Thread(target=ConnectToMultiplayerHost, args=("127.0.0.1", 4040))
+    MultiplayerThread.start()
+
+    while not AllPlayersReady:
+        time.sleep(0.5)
+        print("Waiting for all players to be ready...")
+
+    print("All players are ready!")
+
+    client.client_socket.send("[MESSAGE]PleaseRespond[MESSAGE]".encode())
+
+    while defend is None:
+        time.sleep(0.1)
+        print("Waiting for server to assign player role...")
+
+    if defend:
+        print("You are a defender")
+        defenderGameLoop()
+    else:
+        print("You are an attacker")
+        attackerGameLoop()
 
 
 if __name__ == "__main__":
