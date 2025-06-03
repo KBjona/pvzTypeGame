@@ -194,6 +194,24 @@ def ClientMessageHandler(client, msg):
 		else:
 			ConsoleWriter(f"Client{ClientsList.index(client)}:Mismatch info with server")
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
+	elif ("damage" in msg):
+		if ClientsList.index(client) == 0:
+			try:
+				msg = msg.replace("[REQUEST]", "").split("|")
+				id = int(msg[1])
+				amount = int(msg[2])
+			except:
+				client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
+			return
+		else:
+			try:
+				msg = msg.replace("[REQUEST]", "").split("|")
+				index = int(msg[1])
+				index2 = int(msg[2])
+				amount = int(msg[3])
+			except:
+				client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
+			return
 	else:
 		client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 
