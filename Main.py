@@ -114,8 +114,8 @@ def attackerSetup():
 
 
 
-    tiles[0][0] = Defender("peashooter", 0, 0, 30, 100, 100, peashooter) # For testing purposes
-    print(tiles[0][0].health)
+    #tiles[0][0] = Defender("peashooter", 0, 0, 30, 100, 100, peashooter) # For testing purposes
+    #print(tiles[0][0].health)      
 
 
 
