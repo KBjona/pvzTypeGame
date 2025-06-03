@@ -24,6 +24,8 @@ attackers = []
 projectiles = []
 
 
+
+
 def setup_defenders():
     global screenColor, Width, Height, Time, tilewidth, tileheight
     global screen, clock, tiles, peashooter, bg, sunflower, sap_proj
@@ -78,12 +80,12 @@ def setup():
 
     setup_defenders()
 
+
     projectiles = []
 
 def attackerSetup():
     global screenColor, Width, Height, Time, tilewidth, tileheight
     global screen, clock, tiles, peashooter, bg, sunflower, sap_proj, moshe, shlomi, josh
-
     pygame.init()
     pygame.font.init()
 
@@ -273,6 +275,10 @@ def getinput(status, loc = 0):
         elif current_attacker == 3 and attackerMoney >= 150:
             attackerMoney -= 150
             attackers.append(Attacker("josh", Width + 200 - 100, loc * 80 + 100, 30, 30, 150, josh))
+    if status == "test":
+        print("test clicked", loc)
+        attackers.append(Attacker("josh", Width + 200 - 100, loc * 80 + 100, 30, 30, 150, josh))
+    print("boo")
 
 def update_attackers():
     global attackers
@@ -342,6 +348,7 @@ def display_current(status):
 
 
 def defenderGameLoop():
+    attackerSetup()
     setup()
     font = pygame.font.SysFont("Arial", 30)
     running = True
@@ -351,6 +358,7 @@ def defenderGameLoop():
         draw_grid("defender")
         draw_projectiles()
         draw_attackers()
+        update_attackers()
         draw_text("Money: " + str(defenderMoney), font, (255,255,255), 0,0)
         display_current("defender")
         for event in pygame.event.get():
