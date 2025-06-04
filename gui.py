@@ -2,6 +2,7 @@ import pygame
 import threading
 import network.client as client
 import socket  # For validating hostnames/IPs
+import webbrowser  # For opening the tutorial link
 
 pygame.init()
 
@@ -168,6 +169,45 @@ def second_page():
 
         pygame.display.update()
 
+# Credit page function
+def credit_page():
+    credit_running = True
+    while credit_running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                credit_running = False
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                credit_running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if back_button["rect"].collidepoint(event.pos):
+                    credit_running = False
+
+        window_surface.fill((30, 30, 30))
+        # Draw credit text
+        credit_text = [
+            " FancyBread - networking(coolest thing ever) also ServerGUI and helped in random stuff.(chatgpt hater)",
+            "red_head_redemption (first ginger) -  did the game gui and the game design.(chatgpt hater) "              ,
+            "zohar - did the character design.(chatgpt hater)",
+            "jonathan - did the game.(chatgpt hater)",
+            "sharon frailich - are loved teacher (;",
+        ]
+        for i, line in enumerate(credit_text):
+            text_surface = font.render(line, True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(screen_width // 2, 200 + i * 50))
+            window_surface.blit(text_surface, text_rect)
+
+        # Draw back button
+        rect = back_button["rect"]
+        if rect.collidepoint(pygame.mouse.get_pos()):
+            pygame.draw.rect(window_surface, back_button["hover_color"], rect)
+        else:
+            pygame.draw.rect(window_surface, back_button["color"], rect)
+        text_surface = font.render(back_button["text"], True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=rect.center)
+        window_surface.blit(text_surface, text_rect)
+
+        pygame.display.update()
+
 # Main loop
 is_running = True
 while is_running:
@@ -177,6 +217,21 @@ while is_running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if button_definitions[0]["rect"].collidepoint(event.pos):  # "play multiplayer" button
                 second_page()
+            elif button_definitions[2]["rect"].collidepoint(event.pos):  # "tutorial" button
+                # Try to open in Chrome, fallback to default browser if not found
+                try:
+                    chrome_path = 'C:/Program Files/Google/Chrome/Application/chrome.exe %s'
+                    webbrowser.get(chrome_path).open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+                except webbrowser.Error:
+                    webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+            elif button_definitions[3]["rect"].collidepoint(event.pos):  # "server setup tutorial" button
+                try:
+                    chrome_path = 'C:/Program Files/Google/Chrome/Application/chrome.exe %s'
+                    webbrowser.get(chrome_path).open("https://www.youtube.com/watch?v=hI2btzM13NM")
+                except webbrowser.Error:
+                    webbrowser.open("https://www.youtube.com/watch?v=hI2btzM13NM")
+            elif button_definitions[4]["rect"].collidepoint(event.pos):  # "credit" button
+                credit_page()
 
     # Draw the main page
     window_surface.fill((255, 255, 255))
