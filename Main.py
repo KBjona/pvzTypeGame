@@ -1,8 +1,8 @@
 import pygame
 import time
-import random
 import network.client as client
 import threading
+import sys
 
 global screenColor, Width, Height, Time, tilewidth, tileheight
 global screen, clock, tiles, bg
@@ -60,6 +60,12 @@ def ServerEventHandler(msg):
             tiles[index][index2] = Defender("sunflower", index - 30, index2 - 15, 10, 100, 100, sunflower)
         elif type == 2:
             tiles[index][index2] = Defender("peashooter", index - 30, index2 - 15, 10, 100, 100, peashooter)
+        elif type == 3:
+            attackers.append(Attacker("moshe", Width + 200 - 100, index * 80 + 100, 10, 10, 50, moshe))
+        elif type == 4:
+            attackers.append(Attacker("shlomi", Width + 200 - 100, index * 80 + 100, 20, 20, 100, shlomi))
+        elif type == 5:
+            attackers.append(Attacker("josh", Width + 200 - 100, index * 80 + 100, 30, 30, 150, josh))
 
 def AddMoney(money):
     global defenderMoney
@@ -300,12 +306,15 @@ def getinput(status, loc = 0):
         if current_attacker == 1 and attackerMoney >= 50:
             attackerMoney -= 50
             # Place attacker at the right edge, row 'loc'
+            client.client_socket.send(f"[REQUEST]select|{loc}|0|3[REQUEST]".encode())
             attackers.append(Attacker("moshe", Width + 200 - 100, loc * 80 + 100, 10, 10, 50, moshe))
         elif current_attacker == 2 and attackerMoney >= 100:
             attackerMoney -= 100
+            client.client_socket.send(f"[REQUEST]select|{loc}|0|4[REQUEST]".encode())
             attackers.append(Attacker("shlomi", Width + 200 - 100, loc * 80 + 100, 20, 20, 100, shlomi))
         elif current_attacker == 3 and attackerMoney >= 150:
             attackerMoney -= 150
+            client.client_socket.send(f"[REQUEST]select|{loc}|0|5[REQUEST]".encode())
             attackers.append(Attacker("josh", Width + 200 - 100, loc * 80 + 100, 30, 30, 150, josh))
     if status == "test":
         print("test clicked", loc)
@@ -427,8 +436,16 @@ def attackerGameLoop():
 def main():
     global AllPlayersReady
     global defend
+    
+    if len(sys.argv) > 2:
+        host = sys.argv[1]
+        port = int(sys.argv[2])
+        print(f"Arguments received:\nHost:{host}\nPort:{port}")
+    else:
+        print("----------IMPORTANT----------\nUsage:\npython Main.py <host> <port>")
+        exit()
 
-    MultiplayerThread = threading.Thread(target=ConnectToMultiplayerHost, args=("127.0.0.1", 4040))
+    MultiplayerThread = threading.Thread(target=ConnectToMultiplayerHost, args=(host, port))
     MultiplayerThread.start()
 
     while not AllPlayersReady:
