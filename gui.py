@@ -194,16 +194,8 @@ while is_running:
                 second_page()
             elif button_definitions[2]["rect"].collidepoint(event.pos):  # "tutorial" button
                 # Try to open in Chrome, fallback to default browser if not found
-                try:
-                    chrome_path = 'C:/Program Files/Google/Chrome/Application/chrome.exe %s'
-                    webbrowser.get(chrome_path).open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-                except webbrowser.Error:
                     webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
             elif button_definitions[3]["rect"].collidepoint(event.pos):  # "server setup tutorial" button
-                try:
-                    chrome_path = 'C:/Program Files/Google/Chrome/Application/chrome.exe %s'
-                    webbrowser.get(chrome_path).open("https://www.youtube.com/watch?v=hI2btzM13NM")
-                except webbrowser.Error:
                     webbrowser.open("https://www.youtube.com/watch?v=hI2btzM13NM")
             elif button_definitions[4]["rect"].collidepoint(event.pos):  # "credit" button
                 credit_page()
