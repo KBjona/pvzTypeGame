@@ -3,6 +3,8 @@ import threading
 import network.client as client
 import socket  # For validating hostnames/IPs
 import webbrowser  # For opening the tutorial link
+import os
+import sys
 
 pygame.init()
 
@@ -40,37 +42,10 @@ back_button = {
     "hover_color": (200, 0, 0),
 }
 
-# Event handler for server messages
-def EventHandler(msg):
-    global AllPlayersReady
-    print(f"EventHandler: {msg}")
-    if msg == "[MESSAGE]SERVER FULL[MESSAGE]":
-        AllPlayersReady = True
-        print("All players are ready")
-
-# Connect to the server with validation
 def connect(host, port):
-    try:
-        # Validate the host
-        socket.gethostbyname(host)  # This will raise an exception if the host is invalid
-
-        # Validate the port
-        port = int(port)
-        if port < 1 or port > 65535:
-            raise ValueError("Port must be between 1 and 65535")
-
-        # Proceed with the connection
-        client.init()
-        client.ConnectToServer(host, port)
-        client.SetEventHandler(EventHandler)
-        client.StartReceiving()
-        print(f"Connecting to server: {host} on port: {port}")
-    except ValueError as ve:
-        print(f"Invalid input: {ve}")
-    except socket.gaierror:
-        print("Invalid host: Unable to resolve hostname or IP address")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    args = [sys.executable, "Main.py", host, port]
+    
+    os.execvp(args[0], args)
 
 # Second page function
 def second_page():
