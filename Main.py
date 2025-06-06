@@ -11,8 +11,8 @@ global defenderMoney, attackerMoney
 global AllPlayersReady
 global defend
 
-defenderMoney = 100
-attackerMoney = 100
+defenderMoney = 150
+attackerMoney = 0
 Width = 800
 Height = 600
 Time = 60

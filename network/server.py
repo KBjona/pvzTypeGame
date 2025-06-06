@@ -230,8 +230,8 @@ def BrainsManager():
 	attacker = ClientsList[1]
 	AttackerInfo = ClientsInfo[1]
 
-	brains = 100
-
+	brains = 75
+	time.sleep(15)
 	while running:
 		time.sleep(5)
 		AttackerInfo.currency[0] += brains
@@ -261,7 +261,7 @@ def SaltManager():
 		for i in SaltTimes:
 			i = i.split("|")[0]
 			if int(i) == SaltTime:
-				salt += 25
+				salt += 50
 		if salt <= 0:
 			continue
 		DefenderInfo.currency[0] += salt
