@@ -68,11 +68,7 @@ def second_page():
     connect_button_hover_color = (0, 200, 0)
     connect_button_text = "Connect"
 
-    # Cancel button
-    cancel_button_rect = pygame.Rect(50, 400, 210, 60)
-    cancel_button_color = (255, 0, 0)
-    cancel_button_hover_color = (200, 0, 0)
-    cancel_button_text = "Cancel"
+   
 
     second_page_running = True
     while second_page_running:
@@ -85,14 +81,11 @@ def second_page():
                 server_host_active = server_host_rect.collidepoint(event.pos)
                 server_port_active = server_port_rect.collidepoint(event.pos)
                 if connect_button_rect.collidepoint(event.pos):
-                    if server_host_text.strip() == "" or server_port_text.strip() == "":
-                        print("Error: Both Server Host and Server Port must be filled")
-                    else:
+                    if not server_host_text.strip() == "" and not server_port_text.strip() == "":
+                        
+                   
                         threading.Thread(target=connect, args=(server_host_text.strip(), server_port_text.strip())).start()
-                elif cancel_button_rect.collidepoint(event.pos):
-                    # Clear the text boxes
-                    server_host_text = ""
-                    server_port_text = ""
+            
                 elif back_button["rect"].collidepoint(event.pos):
                     second_page_running = False
             elif event.type == pygame.KEYDOWN:
@@ -131,7 +124,6 @@ def second_page():
         # Draw buttons
         for rect, text, color, hover_color in [
             (connect_button_rect, connect_button_text, connect_button_color, connect_button_hover_color),
-            (cancel_button_rect, cancel_button_text, cancel_button_color, cancel_button_hover_color),
             (back_button["rect"], back_button["text"], back_button["color"], back_button["hover_color"]),
         ]:
             if rect.collidepoint(pygame.mouse.get_pos()):
@@ -164,7 +156,7 @@ def credit_page():
             "red_head_redemption (first ginger) -  did the game gui and the game design.(chatgpt hater) "              ,
             "zohar - did the character design.(chatgpt hater)",
             "jonathan - did the game.(chatgpt hater)",
-            "sharon frailich - are loved teacher (;",
+            "sharon frailich - our loved teacher (;",
         ]
         for i, line in enumerate(credit_text):
             text_surface = font.render(line, True, (255, 255, 255))
@@ -196,8 +188,10 @@ while is_running:
                 # Try to open in Chrome, fallback to default browser if not found
                     webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
             elif button_definitions[3]["rect"].collidepoint(event.pos):  # "server setup tutorial" button
-                    webbrowser.open("https://www.youtube.com/watch?v=hI2btzM13NM")
+                    webbrowser.open("https://www.youtube.com/watch?v=HHOLpVQFsiA")
+                    webbrowser.open("https://www.youtube.com/watch?v=VBlFHuCzPgY")                   
             elif button_definitions[4]["rect"].collidepoint(event.pos):  # "credit" button
+            
                 credit_page()
 
     # Draw the main page
