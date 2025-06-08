@@ -37,7 +37,8 @@ def ServerEventHandler(msg):
     global AllPlayersReady
     global defend
     global tiles
-    
+    global attackers
+
     print(f"EventHandler:{msg}")
     if msg == "[MESSAGE]attacker[MESSAGE]":
         defend = False
@@ -66,6 +67,18 @@ def ServerEventHandler(msg):
             attackers.append(Attacker("shlomi", Width + 200 - 100, index * 80 + 100, 20, 20, 100, shlomi))
         elif type == 5:
             attackers.append(Attacker("josh", Width + 200 - 100, index * 80 + 100, 30, 30, 150, josh))
+    elif "[REQUEST]remove" in msg: #[REQUEST]remove|a/d|id/index|nothing/index[REQUEST]
+        msg = msg.replace("[REQUEST]", "").split("|")
+        print(f"Removing: {msg}")
+        role = msg[1]  # 'a' for attacker, 'd' for defender
+        if role == "a":
+            id = int(msg[2])
+            attackers[id].remove() 
+        elif role == "d":
+            index = int(msg[2])
+            index2 = int(msg[3])
+            tiles[index][index2] = 0
+            
 
 def AddMoney(money):
     global defenderMoney
@@ -190,7 +203,7 @@ def update_attacker():
     clock.tick(Time)
     time.sleep(0.05)
   
-
+ #[REQUEST]damage|index/id|index2/amount/amount/nothing|amount[REQUEST]
 class Defender:
     def __init__(self, type, x, y, damage, health, price, image, time = 0):
         self.type = type
@@ -204,9 +217,6 @@ class Defender:
     def damaged(self, damage):
         print(f"{self.type} damaged for {damage} health. Remaining health: {self.health}")
         self.health -= damage
-        if self.health <= 0:
-            print(f"{self.type} has been defeated and removed from the game.")
-            pass # should be death 
 class Attacker:
     def __init__(self, type, x, y, damage, health, price, image, stopped = False):
         self.type = type
@@ -220,9 +230,11 @@ class Attacker:
     def damaged(self, damage):
         self.health -= damage
         print(f"{self.type} damaged for {damage} health. Remaining health: {self.health}")
-        if self.health <= 0:
-            attackers.remove(self)  # Remove attacker from the list when health is 0
-            print(f"{self.type} has been defeated and removed from the game.")
+        if defend:
+            client.client_socket.send(f"[REQUEST]damage|{attackers.index(self)}|{damage}[REQUEST]".encode())
+    def remove(self):
+        attackers.remove(self)
+        print(f"{self.type} has been removed from the game.")
         
 def draw_text(text, font, color, x, y):
     # Render the text
@@ -331,7 +343,7 @@ def update_attackers():
             print(f"{attacker.type} has left the screen and been removed from the game. ATTACKERS WONNNNNNN")
 
 def check_attacker_defender_collisions():
-    global attackers, tiles
+    global attackers, tiles, defend
     for attacker in attackers:
         blocked = False
         for y in range(tileheight):
@@ -342,10 +354,11 @@ def check_attacker_defender_collisions():
                     attacker_rect = pygame.Rect(attacker.x, attacker.y - 30, 60, 60)
                     if attacker_rect.colliderect(defender_rect):
                         defender.damaged(attacker.damage)
+                        if not defend:
+                            print(f"[REQUEST]damage|{y}|{x}|{attacker.damage}[REQUEST]")
+                            client.client_socket.send(f"[REQUEST]damage|{y}|{x}|{attacker.damage}[REQUEST]".encode())
                         attacker.stopped = True
                         blocked = True
-                        if defender.health <= 0:
-                            tiles[y][x] = 0
                         break  # Stop checking other defenders for this attacker
             if blocked:
                 break
