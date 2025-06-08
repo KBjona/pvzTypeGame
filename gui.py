@@ -7,6 +7,10 @@ import os
 import sys
 
 pygame.init()
+pygame.mixer.init()
+
+# Load click sound
+click_sound = pygame.mixer.Sound("eating-sound-effect-36186.mp3")
 
 # Global variables
 global AllPlayersReady
@@ -44,12 +48,10 @@ back_button = {
 
 def connect(host, port):
     args = [sys.executable, "Main.py", host, port]
-    
     os.execvp(args[0], args)
 
 # Second page function
 def second_page():
-    # Text box definitions
     server_host_rect = pygame.Rect(50, 120, 340, 60)
     server_host_color = (255, 255, 255)
     server_host_border_color = (128, 128, 128)
@@ -62,13 +64,10 @@ def second_page():
     server_port_text = ""
     server_port_active = False
 
-    # Connect button
     connect_button_rect = pygame.Rect(50, 300, 210, 60)
     connect_button_color = (0, 255, 0)
     connect_button_hover_color = (0, 200, 0)
     connect_button_text = "Connect"
-
-   
 
     second_page_running = True
     while second_page_running:
@@ -81,12 +80,11 @@ def second_page():
                 server_host_active = server_host_rect.collidepoint(event.pos)
                 server_port_active = server_port_rect.collidepoint(event.pos)
                 if connect_button_rect.collidepoint(event.pos):
+                    click_sound.play()
                     if not server_host_text.strip() == "" and not server_port_text.strip() == "":
-                        
-                   
                         threading.Thread(target=connect, args=(server_host_text.strip(), server_port_text.strip())).start()
-            
                 elif back_button["rect"].collidepoint(event.pos):
+                    click_sound.play()
                     second_page_running = False
             elif event.type == pygame.KEYDOWN:
                 if server_host_active:
@@ -147,6 +145,7 @@ def credit_page():
                 credit_running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if back_button["rect"].collidepoint(event.pos):
+                    click_sound.play()
                     credit_running = False
 
         window_surface.fill((30, 30, 30))
@@ -157,6 +156,7 @@ def credit_page():
             "zohar - did the character design.(chatgpt hater)",
             "jonathan - did the game.(chatgpt hater)",
             "sharon frailich - our loved teacher (;",
+            "itay meron tsarfaty - did the sound effects and the music.",
         ]
         for i, line in enumerate(credit_text):
             text_surface = font.render(line, True, (255, 255, 255))
@@ -183,15 +183,20 @@ while is_running:
             is_running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if button_definitions[0]["rect"].collidepoint(event.pos):  # "play multiplayer" button
+                click_sound.play()
                 second_page()
+            elif button_definitions[1]["rect"].collidepoint(event.pos):  # "play singleplayer" button
+                click_sound.play()
+                # Add your singleplayer logic here
             elif button_definitions[2]["rect"].collidepoint(event.pos):  # "tutorial" button
-                # Try to open in Chrome, fallback to default browser if not found
-                    webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+                click_sound.play()
+                webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
             elif button_definitions[3]["rect"].collidepoint(event.pos):  # "server setup tutorial" button
-                    webbrowser.open("https://www.youtube.com/watch?v=HHOLpVQFsiA")
-                    webbrowser.open("https://www.youtube.com/watch?v=VBlFHuCzPgY")                   
+                click_sound.play()
+                webbrowser.open("https://www.youtube.com/watch?v=HHOLpVQFsiA")
+                webbrowser.open("https://www.youtube.com/watch?v=VBlFHuCzPgY")                   
             elif button_definitions[4]["rect"].collidepoint(event.pos):  # "credit" button
-            
+                click_sound.play()
                 credit_page()
 
     # Draw the main page
