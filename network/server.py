@@ -35,6 +35,15 @@ SaltTime = 0
 global SaltTimes
 SaltTimes = []
 
+global DefenderHP
+DefenderHP = [[0 for _ in range(9)] for _ in range(5)]
+
+global AttackerHP
+AttackerHP = []
+
+global HPList
+HPList = [0, 100, 100, 10, 20, 30]
+
 class player:
 	def __init__(self, currency):
 		self.currency = currency
@@ -100,7 +109,10 @@ def AcceptConnections():
 		except:
 			continue
 		ClientsList.append(conn)
-		ClientsInfo.append(player([100, 0, 0]))
+		if len(ClientsList) == 1:
+			ClientsInfo.append(player([150, 0, 0]))
+		else:
+			ClientsInfo.append(player([0, 0, 0]))
 		if (len(ClientsList) == MaxClients):
 			TellAll("[MESSAGE]SERVER FULL[MESSAGE]")
 			break
@@ -155,6 +167,9 @@ def ClientMessageHandler(client, msg):
 	global tiles
 	global SaltTimes
 	global SaltTime
+	global DefenderHP
+	global AttackerHP
+	global HPList
 
 	if (msg == "[MESSAGE]PleaseRespond[MESSAGE]"):
 		if ClientsList.index(client) == 0:
@@ -163,7 +178,7 @@ def ClientMessageHandler(client, msg):
 			mode = "attacker"
 		client.send(f"[MESSAGE]{mode}[MESSAGE]".encode())
 		ConsoleWriter(f"responded to client({ClientsList.index(client)})")
-	elif ("select" in msg): # [REQUEST]select|index|index|type[REQUEST] (1=salt, 2=Bolonez, 3=pepper)
+	elif ("select" in msg): # [REQUEST]select|index|index|type[REQUEST]
 		try:
 			msg = msg.replace("[REQUEST]", "").split("|")
 			index = int(msg[1])
@@ -184,7 +199,12 @@ def ClientMessageHandler(client, msg):
 		if all(PlayerInfo.currency[i] >= cost[type][i] for i in range(len(cost[type]))):
 			for i in range(len(cost[type])):
 				PlayerInfo.currency[i] -= cost[type][i]
-			tiles[index][index2] = type
+
+			if ClientsList.index(client) == 0:
+				tiles[index][index2] = type
+				DefenderHP[index][index2] = HPList[type]
+			else:
+				AttackerHP.append(HPList[type])
 			if type == 1:
 				SaltTimes.append(f"{SaltTime}|{index}|{index2}")
 				ConsoleWriter(str(SaltTimes))
@@ -197,7 +217,7 @@ def ClientMessageHandler(client, msg):
 		else:
 			ConsoleWriter(f"Client{ClientsList.index(client)}:Mismatch info with server")
 			client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
-	elif ("damage" in msg):
+	elif ("damage" in msg): #[REQUEST]damage|index/id|index2/amount/amount/nothing|amount[REQUEST]
 		if ClientsList.index(client) == 0:
 			try:
 				msg = msg.replace("[REQUEST]", "").split("|")
@@ -205,20 +225,45 @@ def ClientMessageHandler(client, msg):
 				amount = int(msg[2])
 			except:
 				client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
-			return
+				return
 		
-			#damage logic here
+			#damage validation logic here(currently assuming validated)
+
+			if len(AttackerHP) <= id or id < 0 or not id in AttackerHP:
+				client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
+				return
+
+			AttackerHP[id] -= amount
+
+			if AttackerHP[id] <= 0:
+				AttackerHP[id] = None
+				TellAll(f"[REQUEST]remove|a|{id}[REQUEST]")
+
+			client.send("[RESPONSE]OK:DAMAGED[RESPONSE]".encode())
 		else:
 			try:
 				msg = msg.replace("[REQUEST]", "").split("|")
+				print(msg)
 				index = int(msg[1])
 				index2 = int(msg[2])
 				amount = int(msg[3])
 			except:
 				client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
-			return
+				return
 		
-			#damage logic here
+			#damage validation logic here(currently assuming validated)
+
+			if DefenderHP[index][index2] == None or DefenderHP[index][index2] == 0:
+				client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
+				return
+
+			DefenderHP[index][index2] -= amount
+
+			if DefenderHP[index][index2] <= 0:
+				tiles[index][index2] = 0
+				TellAll(f"[REQUEST]remove|d|{index}|{index2}[REQUEST]")
+
+			client.send("[RESPONSE]OK:DAMAGED[RESPONSE]".encode())
 	else:
 		client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 
