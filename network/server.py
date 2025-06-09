@@ -208,7 +208,6 @@ def ClientMessageHandler(client, msg):
 			if type == 1:
 				SaltTimes.append(f"{SaltTime}|{index}|{index2}")
 				ConsoleWriter(str(SaltTimes))
-			client.send("[RESPONSE]OK:SELECTED[RESPONSE]".encode())
 			ConsoleWriter(f"Selected tile: {index} | {index2}\ntiles:{tiles}\nPlayerInfo: {PlayerInfo.currency}")
 			if ClientsList.index(client) == 0:
 				ClientsList[1].send(f"[REQUEST]select|{index}|{index2}|{type}[REQUEST]".encode())
@@ -226,20 +225,22 @@ def ClientMessageHandler(client, msg):
 			except:
 				client.send("[RESPONSE]ERR:FORMAT ERROR[RESPONSE]".encode())
 				return
-		
+
 			#damage validation logic here(currently assuming validated)
 
-			if len(AttackerHP) <= id or id < 0 or not id in AttackerHP:
+			if len(AttackerHP) <= id or id < 0:
 				client.send("[RESPONSE]ERR:MISMATCH INFO WITH SERVER[RESPONSE]".encode())
 				return
 
+			print(f"AttackerHP: {AttackerHP} | id: {id} | amount: {amount}")
 			AttackerHP[id] -= amount
 
 			if AttackerHP[id] <= 0:
-				AttackerHP[id] = None
+				try:
+					AttackerHP.pop(id)
+				except IndexError:
+					print("Error removing attacker HP, index out of range")
 				TellAll(f"[REQUEST]remove|a|{id}[REQUEST]")
-
-			client.send("[RESPONSE]OK:DAMAGED[RESPONSE]".encode())
 		else:
 			try:
 				msg = msg.replace("[REQUEST]", "").split("|")
@@ -260,6 +261,8 @@ def ClientMessageHandler(client, msg):
 			DefenderHP[index][index2] -= amount
 
 			if DefenderHP[index][index2] <= 0:
+				if tiles[index][index2] == 1:
+					SaltTimes.pop()
 				tiles[index][index2] = 0
 				TellAll(f"[REQUEST]remove|d|{index}|{index2}[REQUEST]")
 

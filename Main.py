@@ -73,6 +73,7 @@ def ServerEventHandler(msg):
         role = msg[1]  # 'a' for attacker, 'd' for defender
         if role == "a":
             id = int(msg[2])
+            print(f"Removing attacker with id: {id}")
             attackers[id].remove() 
         elif role == "d":
             index = int(msg[2])
@@ -231,9 +232,13 @@ class Attacker:
         self.health -= damage
         print(f"{self.type} damaged for {damage} health. Remaining health: {self.health}")
         if defend:
+            print(f"[REQUEST]damage|{attackers.index(self)}|{damage}[REQUEST]")
             client.client_socket.send(f"[REQUEST]damage|{attackers.index(self)}|{damage}[REQUEST]".encode())
     def remove(self):
-        attackers.remove(self)
+        try:
+            attackers.remove(self)
+        except:
+            print(f"Error: {self.type} not found in attackers list.")
         print(f"{self.type} has been removed from the game.")
         
 def draw_text(text, font, color, x, y):
@@ -266,11 +271,17 @@ def update_projectiles():
             if projectile.colliderect(attacker_rect):
                 attacker.damaged(10)  # Assuming each projectile does 10 damage
                 if projectile in projectiles:
-                    projectiles.remove(projectile)
+                    try:
+                        projectiles.remove(projectile)
+                    except:
+                        print("Projectile already removed or not found in the list.")
                 break  # Stop checking other attackers for this projectile
 
         if projectile.x > Width:
-            projectiles.remove(projectile)
+            try:
+                projectiles.remove(projectile)
+            except:
+                print("Projectile already removed or not found in the list.")
 
 
 
@@ -289,8 +300,10 @@ def draw_grid(status):
                 pass
             else:
                 defender = tiles[y][x]
-                screen.blit(defender.image, (x * 80 + 53, y * 80 + 92))
-    
+                if status == "attacker":
+                    screen.blit(defender.image, (x * 72 + 53, y * 80 + 92))
+                else:
+                    screen.blit(defender.image, (x * 80 + 53, y * 80 + 92))
             if pygame.mouse.get_pressed()[0] and sqr.collidepoint(pygame.mouse.get_pos()): 
                 getinput(status)
 
@@ -350,7 +363,7 @@ def check_attacker_defender_collisions():
             for x in range(tilewidth):
                 defender = tiles[y][x]
                 if defender != 0:
-                    defender_rect = pygame.Rect(x * 80 + 53, y * 80 + 92, 60, 60)
+                    defender_rect = pygame.Rect(x * 72 + 53, y * 80 + 92, 60, 60)
                     attacker_rect = pygame.Rect(attacker.x, attacker.y - 30, 60, 60)
                     if attacker_rect.colliderect(defender_rect):
                         defender.damaged(attacker.damage)

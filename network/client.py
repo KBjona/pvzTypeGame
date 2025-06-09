@@ -1,6 +1,7 @@
 import socket
 import threading
 import time
+import re
 
 global client_socket
 client_socket = None
@@ -63,18 +64,26 @@ def Receiver():
         if UnFinishedMsg != None:
             msg += UnFinishedMsg
 
-        if any(msg.startswith(tag) and msg.endswith(tag) for tag in MessageTags):
-            print(f"VALID MESSAGE:{msg}\n EXECUTING EVENT HANDLER")
+        for tag in MessageTags:
+            if not msg.startswith(tag):
+                continue
+            opener = re.escape(tag)
+            pattern = re.compile(opener + r".*?" + opener)
+            m = pattern.search(msg)
+            if not m:
+                break
+            tmp = m.group(0)
+            rest = msg[:m.start()] + msg[m.end():]
+            print(f"VALID MESSAGE:{tmp}\n EXECUTING EVENT HANDLER")
             if EventHandler != None:
-                EventHandler(msg)
+                EventHandler(tmp)
             else:
                 print("No event handler set, ignoring.")
-            UnFinishedMsg = None
-        elif any(msg.startswith(tag) for tag in MessageTags):
-            print("INVALID MESSAGE SAVES TO UNFINISHEDMSG")
-            UnFinishedMsg = msg
-        else:
-            print("INVALID MESSAGE")
+            if rest == "":
+                UnFinishedMsg = None
+            else:
+                UnFinishedMsg = rest
+            print(msg, UnFinishedMsg)
 
         DeathCounter = 0
 
