@@ -130,7 +130,7 @@ def setup():
 
     screen = pygame.display.set_mode((Width, Height))
 
-    pygame.display.set_caption("presidents vs nazis")
+    pygame.display.set_caption("americans vs food")
 
     clock = pygame.time.Clock()
 
@@ -364,7 +364,7 @@ def check_attacker_defender_collisions():
                 defender = tiles[y][x]
                 if defender != 0:
                     defender_rect = pygame.Rect(x * 72 + 53, y * 80 + 92, 60, 60)
-                    attacker_rect = pygame.Rect(attacker.x, attacker.y - 30, 60, 60)
+                    attacker_rect = pygame.Rect(attacker.x, attacker.y - 20, 60, 60)
                     if attacker_rect.colliderect(defender_rect):
                         defender.damaged(attacker.damage)
                         if not defend:
