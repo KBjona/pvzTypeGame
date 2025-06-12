@@ -383,7 +383,7 @@ def draw_attackers():
         screen.blit(attacker.image, (attacker.x, attacker.y - 30))
 
 def place_attacker():
-    idk = pygame.image.load("images/mize.png").convert_alpha()
+    idk = pygame.image.load("images/Screenshot 2025-04-24 204748.png").convert_alpha()
     idk = pygame.transform.scale(idk, (70, 70))
     for y in range(tileheight):
         rect = pygame.Rect(850, y * 80 + 100, 60, 60)
