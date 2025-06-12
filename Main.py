@@ -346,14 +346,23 @@ def getinput(status, loc = 0):
         attackers.append(Attacker("josh", Width + 200 - 100, loc * 80 + 100, 30, 30, 150, josh))
     print("boo")
 
-def update_attackers():
+def update_attackers(status):
     global attackers
     for attacker in attackers[:]:
         if not getattr(attacker, "stopped", False):  # Only move if not stopped
             attacker.x -= 5
         if attacker.x < -100:
             attackers.remove(attacker)
+            if status == "defender":
+                deafeatScreen()
+            else
+                victoryScreen()
             print(f"{attacker.type} has left the screen and been removed from the game. ATTACKERS WONNNNNNN")
+
+def deafeatScreen():
+
+    pass
+def victoryScreen():
 
 def check_attacker_defender_collisions():
     global attackers, tiles, defend
@@ -433,7 +442,7 @@ def defenderGameLoop():
                 running = False
                 print("You clicked the X button")
         update()
-
+•
     pygame.quit()
 
 def attackerGameLoop():
